@@ -399,21 +399,6 @@
   }
   .table-scroll{overflow-x:auto;}
 
-  .read-only-banner{
-    display:none;
-    position:sticky;
-    top:0;
-    z-index:1100;
-    background:var(--note-bg);
-    color:var(--note-text);
-    border-bottom:1px solid var(--note-border);
-    padding:10px 16px;
-    font-size:0.8rem;
-    font-weight:600;
-    text-align:center;
-  }
-  .read-only-banner.show{display:block;}
-
   @media (max-width:480px){
     header.top h1{font-size:1.9rem;}
     .activity-head{flex-direction:column;}
@@ -422,8 +407,6 @@
 </style>
 </head>
 <body>
-
-<div class="read-only-banner" id="readOnlyBanner">Este enlace no tiene permiso de edición: tu respuesta se guardó solo en este dispositivo. Pide al organizador un enlace con permiso para editar, o descarga tu respaldo abajo.</div>
 
 <header class="top">
   <button id="adminBtn">Admin</button>
@@ -457,9 +440,7 @@
   <div class="modal-box">
     <h2 class="serif">¡Gracias por ser parte de nuestra alegría!</h2>
     <p>Tu confirmación ha sido guardada con éxito. Si quieres editar, responde nuevamente o contacta a Emily para algún cambio.</p>
-    <p id="syncWarningNote" style="display:none; font-size:0.78rem; color:var(--note-text); margin-top:-12px;">No se pudo guardar en la base compartida (este enlace parece ser de solo lectura). Tu respuesta se guardó en este dispositivo — descárgala y envíasela a Emily como respaldo.</p>
     <a href="#" id="whatsappBtn" class="btn-whatsapp" target="_blank" rel="noopener">Enviar mi resumen por WhatsApp</a>
-    <button class="btn-secondary" id="downloadBackupBtn" style="display:none; margin:12px auto 0;">Descargar respaldo (.csv)</button>
     <button class="btn-close-modal" id="closeModalBtn">Cerrar</button>
   </div>
 </div>
@@ -485,11 +466,6 @@
   </div>
 </div>
 
-<!-- Base compartida de respuestas: la fuente de verdad en vivo. Cada <tr> = una familia. -->
-<table style="display:none" aria-hidden="true">
-  <tbody id="dataStore" artifact-sync></tbody>
-</table>
-
 <script>
 /* =====================================================================
    CONFIG
@@ -497,33 +473,8 @@
 const ADMIN_PASSWORD = "marcos2026";
 const LOCAL_STORAGE_KEY = "rsvp_marcos_bar_mitzva";
 
-/* =====================================================================
-   CAPABILITIES — resolved once at load; handlers read these by closure.
-   Absent (null) when the page is opened outside the Artifact viewer
-   (a plain local file, or hosting elsewhere) or when this view is
-   read-only, in which case everything degrades to localStorage-only.
-   ===================================================================== */
-let artifactCap = null;
-let downloadsCap = null;
-let syncBroken = false;
-
-(async () => {
-  if (typeof window !== "undefined" && window.claude && typeof window.claude.use === "function") {
-    try { artifactCap = await window.claude.use("artifact"); } catch (e) { artifactCap = null; }
-    try { downloadsCap = await window.claude.use("downloads"); } catch (e) { downloadsCap = null; }
-  }
-})();
-
-document.addEventListener("claude:sync-off", () => {
-  syncBroken = true;
-  document.getElementById("readOnlyBanner").classList.add("show");
-});
-
-document.addEventListener("claude:edit", () => {
-  if (document.getElementById("adminOverlay").classList.contains("show")) {
-    refreshAdminView();
-  }
-});
+// Backend real en Google Sheets vía Apps Script (ver /rsvp-backend).
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjVXv3k9aFGTCSR2XDq9znboliogxSzgdtn6a_IY2_jsXzjfGKk7x6Q4H7TQAewz-E/exec";
 
 const FAMILIES = [
   "Elias y Emily Dana",
@@ -752,56 +703,6 @@ function saveToLocalStorage(record) {
 }
 
 /* =====================================================================
-   SHARED DATA STORE — a hidden <tbody artifact-sync> is the live,
-   shared database: writing to it inside a click handler is captured
-   automatically and reaches every open viewer (including Admin),
-   no import needed. Falls back to being a plain per-device DOM table
-   when the page isn't running inside the Artifact viewer.
-   ===================================================================== */
-function findRowByFamily(tbody, family) {
-  const rows = tbody.querySelectorAll("tr");
-  for (const tr of rows) {
-    const ftd = tr.querySelector(".f");
-    if (ftd && ftd.textContent === family) return tr;
-  }
-  return null;
-}
-
-function upsertDataStoreRow(record) {
-  const tbody = document.getElementById("dataStore");
-  if (!tbody) return;
-  const json = JSON.stringify(record.activities);
-  let tr = findRowByFamily(tbody, record.family);
-  if (tr) {
-    tr.querySelector(".t").textContent = record.timestamp;
-    tr.querySelector(".j").textContent = json;
-  } else {
-    tr = document.createElement("tr");
-    const tdF = document.createElement("td"); tdF.className = "f"; tdF.textContent = record.family;
-    const tdT = document.createElement("td"); tdT.className = "t"; tdT.textContent = record.timestamp;
-    const tdJ = document.createElement("td"); tdJ.className = "j"; tdJ.textContent = json;
-    tr.appendChild(tdF); tr.appendChild(tdT); tr.appendChild(tdJ);
-    tbody.appendChild(tr);
-  }
-}
-
-function readAllRecordsFromDataStore() {
-  const tbody = document.getElementById("dataStore");
-  if (!tbody) return [];
-  const records = [];
-  tbody.querySelectorAll("tr").forEach(tr => {
-    const family = (tr.querySelector(".f") || {}).textContent || "";
-    const timestamp = (tr.querySelector(".t") || {}).textContent || "";
-    const jsonText = (tr.querySelector(".j") || {}).textContent || "{}";
-    if (!family) return;
-    let activities = {};
-    try { activities = JSON.parse(jsonText); } catch (e) { activities = {}; }
-    records.push({ family, timestamp, activities });
-  });
-  return records;
-}
-
-/* =====================================================================
    SUBMIT
    ===================================================================== */
 document.getElementById("submitBtn").addEventListener("click", () => {
@@ -815,26 +716,22 @@ document.getElementById("submitBtn").addEventListener("click", () => {
 
   const record = collectFormData();
 
-  // 1. Per-device backup — always works
+  // 1. Local backup — always works, even offline
   saveToLocalStorage(record);
 
-  // 2. Write into the shared, synced store — captured automatically
-  //    by the Artifact runtime as part of this click, reaching every
-  //    viewer (including Admin) live, no import needed.
-  upsertDataStoreRow(record);
+  // 2. POST to the Google Sheets backend — fire and forget. If the
+  //    connection fails, don't block or show an ugly error: the local
+  //    backup above already has it, and the success modal below still
+  //    shows normally (degrade gracefully).
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify(record)
+  }).catch(err => {
+    console.warn("No se pudo conectar al backend, se guardó localmente.", err);
+  });
 
   showSuccessModal(record);
-
-  // 3. If this view turns out to be read-only, the runtime fires
-  //    claude:sync-off shortly after — check and adjust the modal.
-  setTimeout(() => {
-    if (syncBroken) {
-      document.getElementById("syncWarningNote").style.display = "block";
-      const backupBtn = document.getElementById("downloadBackupBtn");
-      backupBtn.style.display = "inline-block";
-      backupBtn.onclick = () => downloadRecordAsCsv(record);
-    }
-  }, 400);
 });
 
 /* =====================================================================
@@ -875,8 +772,6 @@ function showSuccessModal(record) {
   const summary = buildWhatsappSummary(record);
   const waLink = "https://wa.me/?text=" + encodeURIComponent(summary);
   document.getElementById("whatsappBtn").setAttribute("href", waLink);
-  document.getElementById("syncWarningNote").style.display = "none";
-  document.getElementById("downloadBackupBtn").style.display = "none";
   document.getElementById("successModal").classList.add("show");
 }
 
@@ -947,72 +842,37 @@ function triggerCsvDownload(content, filename) {
   URL.revokeObjectURL(url);
 }
 
-// Offers a CSV file to the viewer. Inside the Artifact runtime, a plain
-// <a download> is inert, so this goes through the downloads capability
-// (falling back to .txt if the viewer doesn't have extended types
-// enabled); outside the Artifact runtime it just triggers a normal
-// browser download.
-async function offerCsvDownload(filename, content) {
-  if (downloadsCap) {
-    try {
-      await downloadsCap.save({ filename, data: content });
-      return true;
-    } catch (err) {
-      if (err && err.code === "extension_not_enabled") {
-        try {
-          await downloadsCap.save({ filename: filename.replace(/\.csv$/i, ".txt"), data: content });
-          return true;
-        } catch (err2) { /* fall through */ }
-      } else if (err && err.code === "declined") {
-        return false;
-      }
-    }
-  }
-  triggerCsvDownload(content, filename);
-  return true;
-}
-
 function downloadRecordAsCsv(record) {
   const safeFamily = record.family.replace(/[^a-zA-Z0-9]+/g, "_");
   const content = recordsToCsvContent([record]);
-  offerCsvDownload(`RSVP_${safeFamily}.csv`, content);
+  triggerCsvDownload(content, `RSVP_${safeFamily}.csv`);
 }
 
 /* =====================================================================
-   ADMIN PANEL — reads straight from the shared data store (live,
-   authoritative), folding in this device's own local backup so the
-   panel still shows something when opened outside the Artifact runtime.
+   ADMIN PANEL — reads straight from the Google Sheets backend (live,
+   authoritative for every family regardless of device), so nothing
+   needs to be imported.
    ===================================================================== */
 const adminOverlay = document.getElementById("adminOverlay");
 const adminStatus = document.getElementById("adminStatus");
 const adminTableBody = document.getElementById("adminTableBody");
 let lastAdminRecords = [];
 
-function collectAllRecords() {
-  const map = {};
-  const mergeIn = (rec) => {
-    if (!rec.family) return;
-    const existing = map[rec.family];
-    const existingTime = existing ? (Date.parse(existing.timestamp) || 0) : -1;
-    const newTime = Date.parse(rec.timestamp) || 0;
-    if (!existing || newTime >= existingTime) map[rec.family] = rec;
-  };
-  readAllRecordsFromDataStore().forEach(mergeIn);
-  let localAll = {};
-  try { localAll = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || {}; } catch (e) { localAll = {}; }
-  Object.values(localAll).forEach(mergeIn);
-  return Object.values(map).sort((a, b) => (a.family || "").localeCompare(b.family || ""));
-}
-
-function refreshAdminView() {
-  lastAdminRecords = collectAllRecords();
-  renderAdminTable(lastAdminRecords);
-  const modeText = artifactCap
-    ? "Conectado a la base compartida en vivo."
-    : (window.claude ? "Este enlace es de solo lectura — mostrando solo el respaldo de este dispositivo." : "Abierto como archivo local, sin conexión compartida.");
-  adminStatus.textContent = lastAdminRecords.length === 0
-    ? `No hay confirmaciones todavía. ${modeText}`
-    : `${lastAdminRecords.length} familia(s) registradas. ${modeText}`;
+async function refreshAdminView() {
+  adminStatus.textContent = "Cargando respuestas desde Google Sheets...";
+  adminTableBody.innerHTML = "";
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, { method: "GET" });
+    const data = await res.json();
+    lastAdminRecords = (Array.isArray(data) ? data : []).sort((a, b) => (a.family || "").localeCompare(b.family || ""));
+    renderAdminTable(lastAdminRecords);
+    adminStatus.textContent = lastAdminRecords.length === 0
+      ? "No hay confirmaciones registradas todavía."
+      : `${lastAdminRecords.length} familia(s) han confirmado.`;
+  } catch (err) {
+    adminStatus.textContent = "Error al conectar con el backend. Verifica tu conexión.";
+    console.error(err);
+  }
 }
 
 document.getElementById("adminBtn").addEventListener("click", () => {
@@ -1038,7 +898,7 @@ document.getElementById("exportCsvBtn").addEventListener("click", () => {
     return;
   }
   const content = recordsToCsvContent(lastAdminRecords);
-  offerCsvDownload(`RSVP_Marcos_Dana_${new Date().toISOString().slice(0, 10)}.csv`, content);
+  triggerCsvDownload(content, `RSVP_Marcos_Dana_${new Date().toISOString().slice(0, 10)}.csv`);
 });
 
 function activitySummaryHtml(record) {

@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bar Mitzvá de Marcos Dana — RSVP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#F7F4EF;
+    --card:#FAF8F5;
+    --gold:#A38A5F;
+    --gold-dark:#8a7350;
+    --text:#3A3530;
+    --green:#3E8E5A;
+    --green-dark:#2f6e45;
+    --border:#E7E0D3;
+    --radius:14px;
+    --shadow:0 2px 10px rgba(58,53,48,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ivory);
+    color:var(--text);
+    font-family:'Montserrat',sans-serif;
+    padding-bottom:60px;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.serif{font-family:'Cormorant Garamond',serif;}
+  a{color:inherit;}
+
+  header.top{
+    position:relative;
+    text-align:center;
+    padding:34px 16px 22px;
+    background:linear-gradient(180deg, #FFFDFA 0%, var(--ivory) 100%);
+    border-bottom:1px solid var(--border);
+  }
+  header.top h1{
+    font-size:2.4rem;
+    font-weight:700;
+    color:var(--gold-dark);
+    margin:0 0 4px;
+    letter-spacing:0.5px;
+  }
+  header.top .subtitle{
+    font-size:1.05rem;
+    color:var(--text);
+    opacity:0.75;
+    font-weight:500;
+  }
+  #adminBtn{
+    position:absolute;
+    top:16px;
+    right:14px;
+    background:transparent;
+    border:1px solid var(--gold);
+    color:var(--gold-dark);
+    padding:6px 14px;
+    border-radius:20px;
+    font-size:0.78rem;
+    font-family:'Montserrat',sans-serif;
+    cursor:pointer;
+    opacity:0.8;
+  }
+  #adminBtn:hover{opacity:1; background:rgba(163,138,95,0.08);}
+
+  .legend{
+    max-width:640px;
+    margin:18px auto 0;
+    padding:12px 18px;
+    display:flex;
+    gap:22px;
+    justify-content:center;
+    flex-wrap:wrap;
+    font-size:0.85rem;
+    color:var(--text);
+    opacity:0.85;
+  }
+  .legend span{white-space:nowrap;}
+
+  main{max-width:640px; margin:0 auto; padding:18px 14px 0;}
+
+  .family-select-wrap{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px;
+    margin-bottom:22px;
+    box-shadow:var(--shadow);
+  }
+  .family-select-wrap label{
+    display:block;
+    font-weight:600;
+    margin-bottom:8px;
+    font-size:0.95rem;
+  }
+  select, input[type=text]{
+    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:#fff;
+    font-family:'Montserrat',sans-serif;
+    font-size:0.95rem;
+    color:var(--text);
+  }
+
+  .day-section{margin-bottom:28px;}
+  .day-title{
+    font-size:1.5rem;
+    font-weight:700;
+    color:var(--gold-dark);
+    margin:0 0 2px;
+  }
+  .day-location{
+    font-size:0.85rem;
+    opacity:0.65;
+    margin-bottom:10px;
+    font-weight:500;
+  }
+  .day-note{
+    background:#FBF1E4;
+    border:1px solid #E9D3A8;
+    color:#7a5a1f;
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:0.85rem;
+    margin-bottom:12px;
+    font-weight:600;
+  }
+  .info-block{
+    background:transparent;
+    border-left:3px solid var(--border);
+    padding:8px 12px;
+    margin-bottom:10px;
+    font-size:0.85rem;
+    opacity:0.7;
+    font-style:italic;
+  }
+
+  .activity-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:12px;
+    box-shadow:var(--shadow);
+  }
+  .activity-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .activity-title{
+    font-weight:600;
+    font-size:0.98rem;
+  }
+  .activity-time{
+    font-size:0.78rem;
+    opacity:0.6;
+    font-weight:500;
+    margin-right:6px;
+  }
+  .activity-icon{font-size:1.05rem; margin-right:4px;}
+  .activity-sub{
+    font-size:0.78rem;
+    opacity:0.6;
+    margin-top:2px;
+  }
+
+  .toggle-group{
+    display:flex;
+    border:1px solid var(--gold);
+    border-radius:20px;
+    overflow:hidden;
+    flex-shrink:0;
+  }
+  .toggle-group button{
+    border:none;
+    background:#fff;
+    color:var(--gold-dark);
+    padding:6px 16px;
+    font-size:0.82rem;
+    font-family:'Montserrat',sans-serif;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .toggle-group button.active{
+    background:var(--gold);
+    color:#fff;
+  }
+  .toggle-group button.active.yes{
+    background:var(--green);
+  }
+
+  .fields-wrap{
+    display:none;
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px dashed var(--border);
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .fields-wrap.show{display:flex;}
+  .field-item{
+    flex:1 1 100px;
+    min-width:90px;
+  }
+  .field-item label{
+    display:block;
+    font-size:0.72rem;
+    font-weight:600;
+    opacity:0.7;
+    margin-bottom:4px;
+    text-transform:uppercase;
+    letter-spacing:0.3px;
+  }
+  .field-item.text-field{flex:1 1 100%;}
+
+  .submit-wrap{
+    text-align:center;
+    margin:28px 0 10px;
+  }
+  #submitBtn{
+    background:var(--gold);
+    color:#fff;
+    border:none;
+    padding:14px 38px;
+    border-radius:26px;
+    font-size:1rem;
+    font-weight:700;
+    font-family:'Montserrat',sans-serif;
+    cursor:pointer;
+    box-shadow:0 4px 14px rgba(163,138,95,0.35);
+  }
+  #submitBtn:hover{background:var(--gold-dark);}
+  .req-note{
+    font-size:0.78rem;
+    opacity:0.6;
+    margin-top:8px;
+  }
+
+  /* Modal */
+  .modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(58,53,48,0.5);
+    z-index:1000;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:26px 22px;
+    max-width:420px;
+    width:100%;
+    text-align:center;
+    box-shadow:0 10px 40px rgba(0,0,0,0.25);
+  }
+  .modal-box h2{
+    color:var(--gold-dark);
+    font-size:1.6rem;
+    margin:0 0 10px;
+  }
+  .modal-box p{
+    font-size:0.9rem;
+    line-height:1.5;
+    margin-bottom:20px;
+  }
+  .btn-whatsapp{
+    display:inline-block;
+    background:var(--green);
+    color:#fff;
+    text-decoration:none;
+    padding:12px 22px;
+    border-radius:24px;
+    font-weight:700;
+    font-size:0.9rem;
+  }
+  .btn-whatsapp:hover{background:var(--green-dark);}
+  .btn-close-modal{
+    display:block;
+    margin:16px auto 0;
+    background:transparent;
+    border:none;
+    color:var(--text);
+    opacity:0.55;
+    font-size:0.82rem;
+    cursor:pointer;
+    text-decoration:underline;
+  }
+
+  /* Admin panel */
+  .admin-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:var(--ivory);
+    z-index:900;
+    overflow-y:auto;
+    padding:16px;
+  }
+  .admin-overlay.show{display:block;}
+  .admin-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .admin-header h2{margin:0; color:var(--gold-dark); font-size:1.6rem;}
+  .admin-actions{display:flex; gap:8px; flex-wrap:wrap;}
+  .btn-secondary{
+    background:#fff;
+    border:1px solid var(--gold);
+    color:var(--gold-dark);
+    padding:8px 16px;
+    border-radius:20px;
+    font-size:0.82rem;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Montserrat',sans-serif;
+  }
+  .btn-secondary.green{border-color:var(--green); color:var(--green-dark);}
+  table.admin-table{
+    width:100%;
+    border-collapse:collapse;
+    background:var(--card);
+    border-radius:10px;
+    overflow:hidden;
+    font-size:0.8rem;
+  }
+  table.admin-table th, table.admin-table td{
+    border:1px solid var(--border);
+    padding:8px 10px;
+    text-align:left;
+    vertical-align:top;
+  }
+  table.admin-table th{
+    background:#F0EAE0;
+    font-weight:700;
+  }
+  .admin-status{
+    font-size:0.82rem;
+    opacity:0.7;
+    margin-bottom:10px;
+  }
+  .table-scroll{overflow-x:auto;}
+
+  @media (max-width:480px){
+    header.top h1{font-size:1.9rem;}
+    .activity-head{flex-direction:column;}
+    .toggle-group{align-self:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <button id="adminBtn">Admin</button>
+  <h1>Marcos Dana</h1>
+  <div class="subtitle">Shilo, Israel · 4–9 de Octubre</div>
+</header>
+
+<div class="legend">
+  <span>🎁 = Incluido / ya pagado por la familia</span>
+  <span>🎫 = Cada quien lo paga de forma independiente</span>
+</div>
+
+<main>
+  <div class="family-select-wrap">
+    <label for="familySelect">Selecciona tu familia *</label>
+    <select id="familySelect" required>
+      <option value="" disabled selected>-- Elige tu familia --</option>
+    </select>
+  </div>
+
+  <div id="daysContainer"></div>
+
+  <div class="submit-wrap">
+    <button id="submitBtn">Enviar Confirmación de Asistencia</button>
+    <div class="req-note">* Debes seleccionar tu familia antes de enviar</div>
+  </div>
+</main>
+
+<!-- Success Modal -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal-box">
+    <h2 class="serif">¡Gracias por ser parte de nuestra alegría!</h2>
+    <p>Tu confirmación ha sido guardada con éxito. Si quieres editar, responde nuevamente o contacta a Emily para algún cambio.</p>
+    <a href="#" id="whatsappBtn" class="btn-whatsapp" target="_blank" rel="noopener">Enviar mi resumen por WhatsApp</a>
+    <button class="btn-close-modal" id="closeModalBtn">Cerrar</button>
+  </div>
+</div>
+
+<!-- Admin Panel -->
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-header">
+    <h2 class="serif">Panel de Administración</h2>
+    <div class="admin-actions">
+      <button class="btn-secondary green" id="exportCsvBtn">Exportar a Excel (CSV)</button>
+      <button class="btn-secondary" id="refreshAdminBtn">Actualizar</button>
+      <button class="btn-secondary" id="closeAdminBtn">Cerrar</button>
+    </div>
+  </div>
+  <div class="admin-status" id="adminStatus"></div>
+  <div class="table-scroll">
+    <table class="admin-table" id="adminTable">
+      <thead>
+        <tr><th>Familia</th><th>Fecha</th><th>Actividades confirmadas</th></tr>
+      </thead>
+      <tbody id="adminTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIG
+   ===================================================================== */
+// Reemplaza esta URL con la del deployment real de Apps Script (paso 5.9)
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/exec";
+const ADMIN_PASSWORD = "marcos2026";
+const LOCAL_STORAGE_KEY = "rsvp_marcos_bar_mitzva";
+
+const FAMILIES = [
+  "Elias y Emily Dana",
+  "Isaac y Linda Chayo",
+  "David y Denise Chayo",
+  "Marcos y Perla Dana",
+  "Daniel y Alice",
+  "Alice y Alberto",
+  "Esther y Alan",
+  "Jessica y Sadegh Harari",
+  "Lior y Yamit Levy",
+  "David y Liana"
+];
+
+const FIELD_LABELS = {
+  adultos: "Adultos",
+  ninos: "Niños",
+  infantes: "Infantes",
+  edades: "Edades",
+  car_seats: "Car seats"
+};
+
+const DAYS = [
+  {
+    title: "DOMINGO 4 DE OCTUBRE",
+    location: "Jerusalem",
+    info: [],
+    note: null,
+    activities: [
+      { id: "tour_ciudad_vieja", time: "12:00", name: "Tour guiado por la Ciudad Vieja", icon: "🎁", type: "simple" },
+      { id: "pelicula_gateway", time: "14:00", name: 'Película "Gateway to Heaven"', icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"] },
+      { id: "ez_raiders", time: "17:00", name: "Ez Raiders", icon: "🎫", type: "counts", fields: ["adultos", "ninos"], textField: "edades" }
+    ]
+  },
+  {
+    title: "LUNES 5 DE OCTUBRE",
+    location: "Jerusalem / Beit Shemesh",
+    info: ["08:00 Rezo en Aish / Desayuno libre"],
+    note: null,
+    activities: [
+      { id: "pantry_packers", time: "12:30", name: "Voluntariado en Pantry Packers", icon: "🎁", type: "counts", fields: ["adultos", "ninos", "infantes"] },
+      { id: "jeeps_beit_shemesh", time: "Tarde", name: "Jeeps en Beit Shemesh", icon: "🎫", type: "counts", fields: ["adultos", "ninos", "car_seats"], textField: "edades" },
+      { id: "cena_pitmaster", time: "20:00", name: "Cena en Pitmaster", icon: "🎫", type: "simple", sub: "Cada quien lo paga" }
+    ]
+  },
+  {
+    title: "MARTES 6 DE OCTUBRE",
+    location: "Mar Muerto y Eretz Beresheet",
+    info: ["10:00 Salida a Ein Guedi y Kalia Beach"],
+    note: null,
+    activities: [
+      { id: "eretz_beresheet", time: "16:45", name: "Eretz Beresheet", icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"], sub: "Entrada con costo" }
+    ]
+  },
+  {
+    title: "MIÉRCOLES 7 DE OCTUBRE",
+    location: "Gush Etzion",
+    info: ["Comida ligera / Pizzas con Hayalim — donativo directo allá"],
+    note: null,
+    activities: [
+      { id: "caliber3", time: "11:00", name: "Caliber 3", icon: "🎫", type: "counts", fields: ["adultos", "ninos"], textField: "edades" }
+    ]
+  },
+  {
+    title: "JUEVES 8 DE OCTUBRE — Día del Bar Mitzvá",
+    location: "Shilo",
+    info: ["Mañana: Darbukas desde el hotel, rezo en el Kotel y desayuno chico"],
+    note: "Vestimenta sugerida para el evento: Blanco / Beige",
+    activities: [
+      { id: "shilo_fiesta", time: "11:30 / 13:30 / 16:00", name: "Salida | Shilo Guiado con Música & Fiesta en Viñedo Shilo", icon: "🎁", type: "counts", fields: ["adultos", "ninos", "infantes"] }
+    ]
+  },
+  {
+    title: "VIERNES 9 DE OCTUBRE — Cierre",
+    location: "",
+    info: ["Desayuno en el hotel y Mahane Yehuda"],
+    note: null,
+    activities: []
+  }
+];
+
+/* =====================================================================
+   RENDER FORM
+   ===================================================================== */
+const familySelect = document.getElementById("familySelect");
+FAMILIES.forEach(f => {
+  const opt = document.createElement("option");
+  opt.value = f;
+  opt.textContent = f;
+  familySelect.appendChild(opt);
+});
+
+const daysContainer = document.getElementById("daysContainer");
+
+function countOptions(selectedVal) {
+  let html = "";
+  for (let i = 0; i <= 5; i++) {
+    html += `<option value="${i}" ${i === selectedVal ? "selected" : ""}>${i}</option>`;
+  }
+  return html;
+}
+
+DAYS.forEach(day => {
+  const section = document.createElement("section");
+  section.className = "day-section";
+
+  let html = `<h2 class="day-title serif">${day.title}</h2>`;
+  if (day.location) html += `<div class="day-location">${day.location}</div>`;
+  if (day.note) html += `<div class="day-note">${day.note}</div>`;
+  day.info.forEach(text => {
+    html += `<div class="info-block">${text}</div>`;
+  });
+
+  day.activities.forEach(act => {
+    html += `
+    <div class="activity-card" data-activity="${act.id}">
+      <div class="activity-head">
+        <div>
+          <div class="activity-title"><span class="activity-icon">${act.icon}</span><span class="activity-time">${act.time}</span>${act.name}</div>
+          ${act.sub ? `<div class="activity-sub">${act.sub}</div>` : ""}
+        </div>
+        <div class="toggle-group" data-toggle-for="${act.id}">
+          <button type="button" class="opt-no active" data-val="no">No</button>
+          <button type="button" class="opt-yes" data-val="yes">Sí</button>
+        </div>
+      </div>`;
+
+    if (act.type === "counts") {
+      html += `<div class="fields-wrap" id="fields_${act.id}">`;
+      act.fields.forEach(fkey => {
+        html += `
+          <div class="field-item">
+            <label>${FIELD_LABELS[fkey]}</label>
+            <select data-field="${fkey}" data-activity-field="${act.id}">${countOptions(0)}</select>
+          </div>`;
+      });
+      if (act.textField) {
+        html += `
+          <div class="field-item text-field">
+            <label>${FIELD_LABELS[act.textField]}</label>
+            <input type="text" data-field="${act.textField}" data-activity-field="${act.id}" placeholder="Ej. 34, 10, 7" />
+          </div>`;
+      }
+      html += `</div>`;
+    }
+
+    html += `</div>`;
+  });
+
+  section.innerHTML = html;
+  daysContainer.appendChild(section);
+});
+
+// Toggle behavior
+document.querySelectorAll(".toggle-group").forEach(group => {
+  const actId = group.dataset.toggleFor;
+  const noBtn = group.querySelector(".opt-no");
+  const yesBtn = group.querySelector(".opt-yes");
+  const fieldsWrap = document.getElementById(`fields_${actId}`);
+
+  noBtn.addEventListener("click", () => {
+    noBtn.classList.add("active");
+    yesBtn.classList.remove("active", "yes");
+    if (fieldsWrap) fieldsWrap.classList.remove("show");
+  });
+  yesBtn.addEventListener("click", () => {
+    yesBtn.classList.add("active", "yes");
+    noBtn.classList.remove("active");
+    if (fieldsWrap) fieldsWrap.classList.add("show");
+  });
+});
+
+/* =====================================================================
+   HELPERS: build activity id -> config map
+   ===================================================================== */
+const ACTIVITY_MAP = {};
+DAYS.forEach(day => {
+  day.activities.forEach(act => {
+    ACTIVITY_MAP[act.id] = act;
+  });
+});
+const ACTIVITY_ORDER = Object.keys(ACTIVITY_MAP);
+
+function collectFormData() {
+  const family = familySelect.value;
+  const activities = {};
+
+  ACTIVITY_ORDER.forEach(actId => {
+    const config = ACTIVITY_MAP[actId];
+    const group = document.querySelector(`.toggle-group[data-toggle-for="${actId}"]`);
+    const attending = group.querySelector(".opt-yes").classList.contains("active");
+    const entry = { attending: attending };
+
+    if (attending && config.type === "counts") {
+      config.fields.forEach(fkey => {
+        const el = document.querySelector(`select[data-field="${fkey}"][data-activity-field="${actId}"]`);
+        entry[fkey] = el ? parseInt(el.value, 10) : 0;
+      });
+      if (config.textField) {
+        const el = document.querySelector(`input[data-field="${config.textField}"][data-activity-field="${actId}"]`);
+        entry[config.textField] = el ? el.value.trim() : "";
+      }
+    }
+    activities[actId] = entry;
+  });
+
+  return {
+    family: family,
+    timestamp: new Date().toISOString(),
+    activities: activities
+  };
+}
+
+/* =====================================================================
+   LOCAL STORAGE (upsert by family)
+   ===================================================================== */
+function saveToLocalStorage(record) {
+  let all = {};
+  try {
+    all = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || {};
+  } catch (e) {
+    all = {};
+  }
+  all[record.family] = record;
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(all));
+}
+
+/* =====================================================================
+   SUBMIT
+   ===================================================================== */
+document.getElementById("submitBtn").addEventListener("click", () => {
+  if (!familySelect.value) {
+    familySelect.style.borderColor = "#c0392b";
+    familySelect.focus();
+    familySelect.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  familySelect.style.borderColor = "";
+
+  const record = collectFormData();
+
+  // 1. Local backup — always works
+  saveToLocalStorage(record);
+
+  // 2. POST to backend — degrade gracefully on failure
+  if (APPS_SCRIPT_URL && APPS_SCRIPT_URL.indexOf("http") === 0) {
+    fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(record)
+    }).catch(err => {
+      console.warn("No se pudo conectar al backend, se guardó localmente.", err);
+    });
+  }
+
+  showSuccessModal(record);
+});
+
+/* =====================================================================
+   SUCCESS MODAL + WHATSAPP SUMMARY
+   ===================================================================== */
+function buildWhatsappSummary(record) {
+  let lines = [];
+  lines.push(`*Confirmación RSVP — Bar Mitzvá de Marcos Dana*`);
+  lines.push(`Familia: ${record.family}`);
+  lines.push("");
+
+  DAYS.forEach(day => {
+    const relevant = day.activities.filter(a => record.activities[a.id]);
+    if (relevant.length === 0) return;
+    lines.push(`*${day.title}*`);
+    relevant.forEach(act => {
+      const entry = record.activities[act.id];
+      let line = `${act.icon} ${act.name}: ${entry.attending ? "Sí" : "No"}`;
+      if (entry.attending && act.type === "counts") {
+        const parts = [];
+        act.fields.forEach(fkey => {
+          parts.push(`${FIELD_LABELS[fkey]}: ${entry[fkey] ?? 0}`);
+        });
+        if (act.textField && entry[act.textField]) {
+          parts.push(`${FIELD_LABELS[act.textField]}: ${entry[act.textField]}`);
+        }
+        if (parts.length) line += ` (${parts.join(", ")})`;
+      }
+      lines.push(line);
+    });
+    lines.push("");
+  });
+
+  return lines.join("\n");
+}
+
+function showSuccessModal(record) {
+  const summary = buildWhatsappSummary(record);
+  const waLink = "https://wa.me/?text=" + encodeURIComponent(summary);
+  document.getElementById("whatsappBtn").setAttribute("href", waLink);
+  document.getElementById("successModal").classList.add("show");
+}
+
+document.getElementById("closeModalBtn").addEventListener("click", () => {
+  document.getElementById("successModal").classList.remove("show");
+});
+
+/* =====================================================================
+   ADMIN PANEL
+   ===================================================================== */
+const adminOverlay = document.getElementById("adminOverlay");
+const adminStatus = document.getElementById("adminStatus");
+const adminTableBody = document.getElementById("adminTableBody");
+let lastAdminRecords = [];
+
+document.getElementById("adminBtn").addEventListener("click", () => {
+  const pass = window.prompt("Contraseña de administrador:");
+  if (pass === null) return;
+  if (pass !== ADMIN_PASSWORD) {
+    alert("Contraseña incorrecta.");
+    return;
+  }
+  adminOverlay.classList.add("show");
+  loadAdminData();
+});
+
+document.getElementById("closeAdminBtn").addEventListener("click", () => {
+  adminOverlay.classList.remove("show");
+});
+
+document.getElementById("refreshAdminBtn").addEventListener("click", loadAdminData);
+
+function activitySummaryHtml(record) {
+  const parts = [];
+  DAYS.forEach(day => {
+    day.activities.forEach(act => {
+      const entry = record.activities ? record.activities[act.id] : null;
+      if (!entry || !entry.attending) return;
+      let text = `${act.icon} ${act.name}`;
+      if (act.type === "counts") {
+        const details = [];
+        (act.fields || []).forEach(fkey => {
+          if (entry[fkey]) details.push(`${FIELD_LABELS[fkey]}: ${entry[fkey]}`);
+        });
+        if (act.textField && entry[act.textField]) details.push(`${FIELD_LABELS[act.textField]}: ${entry[act.textField]}`);
+        if (details.length) text += ` (${details.join(", ")})`;
+      }
+      parts.push(text);
+    });
+  });
+  return parts.length ? parts.join("<br>") : "<em>Sin actividades confirmadas</em>";
+}
+
+function renderAdminTable(records) {
+  adminTableBody.innerHTML = "";
+  records.forEach(rec => {
+    const tr = document.createElement("tr");
+    const fecha = rec.timestamp ? new Date(rec.timestamp).toLocaleString("es-MX") : "";
+    tr.innerHTML = `
+      <td>${rec.family || ""}</td>
+      <td>${fecha}</td>
+      <td>${activitySummaryHtml(rec)}</td>
+    `;
+    adminTableBody.appendChild(tr);
+  });
+}
+
+async function loadAdminData() {
+  adminStatus.textContent = "Cargando respuestas desde Google Sheets...";
+  adminTableBody.innerHTML = "";
+
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("http") !== 0) {
+    adminStatus.textContent = "APPS_SCRIPT_URL no está configurada.";
+    return;
+  }
+
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, { method: "GET" });
+    const data = await res.json();
+    lastAdminRecords = Array.isArray(data) ? data : [];
+    if (lastAdminRecords.length === 0) {
+      adminStatus.textContent = "No hay confirmaciones registradas todavía.";
+    } else {
+      adminStatus.textContent = `${lastAdminRecords.length} familia(s) han confirmado.`;
+    }
+    renderAdminTable(lastAdminRecords);
+  } catch (err) {
+    adminStatus.textContent = "Error al conectar con el backend. Verifica la URL de Apps Script o tu conexión.";
+    console.error(err);
+  }
+}
+
+/* =====================================================================
+   CSV EXPORT
+   ===================================================================== */
+function buildCsvColumns() {
+  const cols = [{ key: "family", label: "Familia" }, { key: "timestamp", label: "Fecha" }];
+  DAYS.forEach(day => {
+    day.activities.forEach(act => {
+      cols.push({ key: `${act.id}__attending`, label: `${act.name} (Sí/No)` });
+      if (act.type === "counts") {
+        (act.fields || []).forEach(fkey => {
+          cols.push({ key: `${act.id}__${fkey}`, label: `${act.name} - ${FIELD_LABELS[fkey]}` });
+        });
+        if (act.textField) {
+          cols.push({ key: `${act.id}__${act.textField}`, label: `${act.name} - ${FIELD_LABELS[act.textField]}` });
+        }
+      }
+    });
+  });
+  return cols;
+}
+
+function csvEscape(val) {
+  if (val === undefined || val === null) val = "";
+  val = String(val);
+  if (/[",\n]/.test(val)) {
+    val = '"' + val.replace(/"/g, '""') + '"';
+  }
+  return val;
+}
+
+document.getElementById("exportCsvBtn").addEventListener("click", () => {
+  const records = lastAdminRecords;
+  if (!records || records.length === 0) {
+    alert("No hay datos para exportar todavía.");
+    return;
+  }
+  const columns = buildCsvColumns();
+  const rows = [columns.map(c => csvEscape(c.label)).join(",")];
+
+  records.forEach(rec => {
+    const row = columns.map(col => {
+      if (col.key === "family") return csvEscape(rec.family);
+      if (col.key === "timestamp") return csvEscape(rec.timestamp);
+      const [actId, field] = col.key.split("__");
+      const entry = rec.activities ? rec.activities[actId] : null;
+      if (!entry) return "";
+      if (field === "attending") return csvEscape(entry.attending ? "Sí" : "No");
+      return csvEscape(entry[field]);
+    });
+    rows.push(row.join(","));
+  });
+
+  const csvContent = "﻿" + rows.join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `RSVP_Marcos_Dana_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>

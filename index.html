@@ -399,6 +399,7 @@
   <div class="modal-box">
     <h2 class="serif">¡Gracias por ser parte de nuestra alegría!</h2>
     <p>Tu confirmación ha sido guardada con éxito. Si quieres editar, responde nuevamente o contacta a Emily para algún cambio.</p>
+    <p style="font-size:0.78rem; opacity:0.65; margin-top:-12px;">Se descargó automáticamente un archivo CSV con tu respuesta — reenvíalo a Emily por WhatsApp o correo para que quede registrado.</p>
     <a href="#" id="whatsappBtn" class="btn-whatsapp" target="_blank" rel="noopener">Enviar mi resumen por WhatsApp</a>
     <button class="btn-close-modal" id="closeModalBtn">Cerrar</button>
   </div>
@@ -409,12 +410,15 @@
   <div class="admin-header">
     <h2 class="serif">Panel de Administración</h2>
     <div class="admin-actions">
+      <input type="file" id="csvImportInput" accept=".csv" multiple style="display:none">
+      <button class="btn-secondary" id="importCsvBtn">Importar CSV</button>
       <button class="btn-secondary green" id="exportCsvBtn">Exportar a Excel (CSV)</button>
       <button class="btn-secondary" id="refreshAdminBtn">Actualizar</button>
       <button class="btn-secondary" id="closeAdminBtn">Cerrar</button>
     </div>
   </div>
   <div class="admin-status" id="adminStatus"></div>
+  <div class="admin-status" style="opacity:0.55;">Cada familia descarga automáticamente un CSV al confirmar. Pide que te lo reenvíen (WhatsApp/email) y súbelo aquí con "Importar CSV" — puedes seleccionar varios archivos a la vez. Las respuestas se van acumulando en este navegador.</div>
   <div class="table-scroll">
     <table class="admin-table" id="adminTable">
       <thead>
@@ -429,10 +433,9 @@
 /* =====================================================================
    CONFIG
    ===================================================================== */
-// Reemplaza esta URL con la del deployment real de Apps Script (paso 5.9)
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/exec";
 const ADMIN_PASSWORD = "marcos2026";
 const LOCAL_STORAGE_KEY = "rsvp_marcos_bar_mitzva";
+const ADMIN_STORAGE_KEY = "rsvp_marcos_admin_master";
 
 const FAMILIES = [
   "Elias y Emily Dana",
@@ -677,16 +680,8 @@ document.getElementById("submitBtn").addEventListener("click", () => {
   // 1. Local backup — always works
   saveToLocalStorage(record);
 
-  // 2. POST to backend — degrade gracefully on failure
-  if (APPS_SCRIPT_URL && APPS_SCRIPT_URL.indexOf("http") === 0) {
-    fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(record)
-    }).catch(err => {
-      console.warn("No se pudo conectar al backend, se guardó localmente.", err);
-    });
-  }
+  // 2. Descarga automática de un CSV con esta respuesta, para reenviar a Emily
+  downloadRecordAsCsv(record);
 
   showSuccessModal(record);
 });
@@ -737,12 +732,186 @@ document.getElementById("closeModalBtn").addEventListener("click", () => {
 });
 
 /* =====================================================================
-   ADMIN PANEL
+   CSV HELPERS (columns, escape, parse) — shared by export/import/download
+   ===================================================================== */
+function buildCsvColumns() {
+  const cols = [{ key: "family", label: "Familia" }, { key: "timestamp", label: "Fecha" }];
+  DAYS.forEach(day => {
+    day.activities.forEach(act => {
+      cols.push({ key: `${act.id}__attending`, label: `${act.name} (Sí/No)` });
+      if (act.type === "counts") {
+        (act.fields || []).forEach(fkey => {
+          cols.push({ key: `${act.id}__${fkey}`, label: `${act.name} - ${FIELD_LABELS[fkey]}` });
+        });
+        if (act.textField) {
+          cols.push({ key: `${act.id}__${act.textField}`, label: `${act.name} - ${FIELD_LABELS[act.textField]}` });
+        }
+      }
+    });
+  });
+  return cols;
+}
+
+function csvEscape(val) {
+  if (val === undefined || val === null) val = "";
+  val = String(val);
+  if (/[",\n]/.test(val)) {
+    val = '"' + val.replace(/"/g, '""') + '"';
+  }
+  return val;
+}
+
+function recordToCsvRow(rec, columns) {
+  return columns.map(col => {
+    if (col.key === "family") return csvEscape(rec.family);
+    if (col.key === "timestamp") return csvEscape(rec.timestamp);
+    const idx = col.key.indexOf("__");
+    const actId = col.key.slice(0, idx);
+    const field = col.key.slice(idx + 2);
+    const entry = rec.activities ? rec.activities[actId] : null;
+    if (!entry) return "";
+    if (field === "attending") return csvEscape(entry.attending ? "Sí" : "No");
+    return csvEscape(entry[field]);
+  }).join(",");
+}
+
+function recordsToCsvContent(records) {
+  const columns = buildCsvColumns();
+  const rows = [columns.map(c => csvEscape(c.label)).join(",")];
+  records.forEach(rec => rows.push(recordToCsvRow(rec, columns)));
+  return "﻿" + rows.join("\n");
+}
+
+function triggerCsvDownload(content, filename) {
+  const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function downloadRecordAsCsv(record) {
+  const safeFamily = record.family.replace(/[^a-zA-Z0-9]+/g, "_");
+  const content = recordsToCsvContent([record]);
+  triggerCsvDownload(content, `RSVP_${safeFamily}.csv`);
+}
+
+// Parses raw CSV text (RFC4180-ish: quoted fields, embedded commas/newlines) into rows of fields.
+function parseCsvText(text) {
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; }
+        else inQuotes = false;
+      } else {
+        field += c;
+      }
+    } else if (c === '"') {
+      inQuotes = true;
+    } else if (c === ",") {
+      row.push(field); field = "";
+    } else if (c === "\n") {
+      row.push(field); rows.push(row); row = []; field = "";
+    } else if (c === "\r") {
+      // ignore, \n handles line breaks
+    } else {
+      field += c;
+    }
+  }
+  if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+  return rows.filter(r => r.some(c => c.trim() !== ""));
+}
+
+function recordFromCsvRow(row, columns) {
+  const record = { family: "", timestamp: "", activities: {} };
+  columns.forEach((col, i) => {
+    const val = row[i] !== undefined ? row[i] : "";
+    if (col.key === "family") { record.family = val.trim(); return; }
+    if (col.key === "timestamp") { record.timestamp = val.trim(); return; }
+    const idx = col.key.indexOf("__");
+    const actId = col.key.slice(0, idx);
+    const field = col.key.slice(idx + 2);
+    const config = ACTIVITY_MAP[actId];
+    if (!config) return;
+    record.activities[actId] = record.activities[actId] || {};
+    if (field === "attending") {
+      const norm = val.trim().toLowerCase();
+      record.activities[actId].attending = (norm === "sí" || norm === "si");
+    } else if (config.textField && field === config.textField) {
+      record.activities[actId][field] = val;
+    } else {
+      record.activities[actId][field] = val === "" ? 0 : (parseInt(val, 10) || 0);
+    }
+  });
+  return record;
+}
+
+/* =====================================================================
+   ADMIN PANEL — master dataset built by merging imported CSVs + this
+   device's own localStorage responses (no external backend).
    ===================================================================== */
 const adminOverlay = document.getElementById("adminOverlay");
 const adminStatus = document.getElementById("adminStatus");
 const adminTableBody = document.getElementById("adminTableBody");
+let adminMap = {}; // family -> record
 let lastAdminRecords = [];
+
+function loadAdminMapFromStorage() {
+  try {
+    adminMap = JSON.parse(localStorage.getItem(ADMIN_STORAGE_KEY)) || {};
+  } catch (e) {
+    adminMap = {};
+  }
+}
+
+function persistAdminMap() {
+  localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(adminMap));
+}
+
+function mergeRecordIntoAdmin(record) {
+  if (!record.family) return false;
+  const existing = adminMap[record.family];
+  if (!existing) {
+    adminMap[record.family] = record;
+    return true;
+  }
+  const existingTime = Date.parse(existing.timestamp) || 0;
+  const newTime = Date.parse(record.timestamp) || 0;
+  if (newTime >= existingTime) {
+    adminMap[record.family] = record;
+  }
+  return true;
+}
+
+function foldInLocalDeviceResponses() {
+  let localAll = {};
+  try {
+    localAll = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || {};
+  } catch (e) {
+    localAll = {};
+  }
+  Object.values(localAll).forEach(rec => mergeRecordIntoAdmin(rec));
+}
+
+function refreshAdminView(statusMsg) {
+  lastAdminRecords = Object.values(adminMap).sort((a, b) => (a.family || "").localeCompare(b.family || ""));
+  renderAdminTable(lastAdminRecords);
+  if (statusMsg) {
+    adminStatus.textContent = statusMsg;
+  } else if (lastAdminRecords.length === 0) {
+    adminStatus.textContent = "No hay confirmaciones registradas todavía. Importa los CSV que te reenvíen las familias.";
+  } else {
+    adminStatus.textContent = `${lastAdminRecords.length} familia(s) registradas en este panel.`;
+  }
+}
 
 document.getElementById("adminBtn").addEventListener("click", () => {
   const pass = window.prompt("Contraseña de administrador:");
@@ -752,14 +921,59 @@ document.getElementById("adminBtn").addEventListener("click", () => {
     return;
   }
   adminOverlay.classList.add("show");
-  loadAdminData();
+  loadAdminMapFromStorage();
+  foldInLocalDeviceResponses();
+  persistAdminMap();
+  refreshAdminView();
 });
 
 document.getElementById("closeAdminBtn").addEventListener("click", () => {
   adminOverlay.classList.remove("show");
 });
 
-document.getElementById("refreshAdminBtn").addEventListener("click", loadAdminData);
+document.getElementById("refreshAdminBtn").addEventListener("click", () => {
+  loadAdminMapFromStorage();
+  foldInLocalDeviceResponses();
+  persistAdminMap();
+  refreshAdminView();
+});
+
+document.getElementById("importCsvBtn").addEventListener("click", () => {
+  document.getElementById("csvImportInput").click();
+});
+
+document.getElementById("csvImportInput").addEventListener("change", async (evt) => {
+  const files = Array.from(evt.target.files || []);
+  if (files.length === 0) return;
+  const columns = buildCsvColumns();
+  let importedRows = 0;
+
+  for (const file of files) {
+    const text = await file.text();
+    const rows = parseCsvText(text);
+    if (rows.length < 2) continue; // header + at least one data row
+    rows.slice(1).forEach(row => {
+      const record = recordFromCsvRow(row, columns);
+      if (record.family) {
+        mergeRecordIntoAdmin(record);
+        importedRows++;
+      }
+    });
+  }
+
+  persistAdminMap();
+  refreshAdminView(`${importedRows} fila(s) importada(s) de ${files.length} archivo(s). Total: ${Object.keys(adminMap).length} familia(s).`);
+  evt.target.value = "";
+});
+
+document.getElementById("exportCsvBtn").addEventListener("click", () => {
+  if (!lastAdminRecords || lastAdminRecords.length === 0) {
+    alert("No hay datos para exportar todavía.");
+    return;
+  }
+  const content = recordsToCsvContent(lastAdminRecords);
+  triggerCsvDownload(content, `RSVP_Marcos_Dana_${new Date().toISOString().slice(0, 10)}.csv`);
+});
 
 function activitySummaryHtml(record) {
   const parts = [];
@@ -796,94 +1010,6 @@ function renderAdminTable(records) {
   });
 }
 
-async function loadAdminData() {
-  adminStatus.textContent = "Cargando respuestas desde Google Sheets...";
-  adminTableBody.innerHTML = "";
-
-  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("http") !== 0) {
-    adminStatus.textContent = "APPS_SCRIPT_URL no está configurada.";
-    return;
-  }
-
-  try {
-    const res = await fetch(APPS_SCRIPT_URL, { method: "GET" });
-    const data = await res.json();
-    lastAdminRecords = Array.isArray(data) ? data : [];
-    if (lastAdminRecords.length === 0) {
-      adminStatus.textContent = "No hay confirmaciones registradas todavía.";
-    } else {
-      adminStatus.textContent = `${lastAdminRecords.length} familia(s) han confirmado.`;
-    }
-    renderAdminTable(lastAdminRecords);
-  } catch (err) {
-    adminStatus.textContent = "Error al conectar con el backend. Verifica la URL de Apps Script o tu conexión.";
-    console.error(err);
-  }
-}
-
-/* =====================================================================
-   CSV EXPORT
-   ===================================================================== */
-function buildCsvColumns() {
-  const cols = [{ key: "family", label: "Familia" }, { key: "timestamp", label: "Fecha" }];
-  DAYS.forEach(day => {
-    day.activities.forEach(act => {
-      cols.push({ key: `${act.id}__attending`, label: `${act.name} (Sí/No)` });
-      if (act.type === "counts") {
-        (act.fields || []).forEach(fkey => {
-          cols.push({ key: `${act.id}__${fkey}`, label: `${act.name} - ${FIELD_LABELS[fkey]}` });
-        });
-        if (act.textField) {
-          cols.push({ key: `${act.id}__${act.textField}`, label: `${act.name} - ${FIELD_LABELS[act.textField]}` });
-        }
-      }
-    });
-  });
-  return cols;
-}
-
-function csvEscape(val) {
-  if (val === undefined || val === null) val = "";
-  val = String(val);
-  if (/[",\n]/.test(val)) {
-    val = '"' + val.replace(/"/g, '""') + '"';
-  }
-  return val;
-}
-
-document.getElementById("exportCsvBtn").addEventListener("click", () => {
-  const records = lastAdminRecords;
-  if (!records || records.length === 0) {
-    alert("No hay datos para exportar todavía.");
-    return;
-  }
-  const columns = buildCsvColumns();
-  const rows = [columns.map(c => csvEscape(c.label)).join(",")];
-
-  records.forEach(rec => {
-    const row = columns.map(col => {
-      if (col.key === "family") return csvEscape(rec.family);
-      if (col.key === "timestamp") return csvEscape(rec.timestamp);
-      const [actId, field] = col.key.split("__");
-      const entry = rec.activities ? rec.activities[actId] : null;
-      if (!entry) return "";
-      if (field === "attending") return csvEscape(entry.attending ? "Sí" : "No");
-      return csvEscape(entry[field]);
-    });
-    rows.push(row.join(","));
-  });
-
-  const csvContent = "﻿" + rows.join("\n");
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `RSVP_Marcos_Dana_${new Date().toISOString().slice(0, 10)}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-});
 </script>
 </body>
 </html>

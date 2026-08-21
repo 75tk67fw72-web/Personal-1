@@ -1278,9 +1278,46 @@ function renderAdminTable(records) {
   });
 }
 
+function renderAgesSummary(records) {
+  const container = document.getElementById("adminSummaryView");
+
+  const ageActivities = [];
+  DAYS.forEach(day => day.activities.forEach(act => { if (act.textField) ageActivities.push(act); }));
+
+  const byFamily = [];
+  records.forEach(rec => {
+    const entries = [];
+    ageActivities.forEach(act => {
+      const entry = rec.activities ? rec.activities[act.id] : null;
+      if (entry && entry.attending && entry[act.textField]) {
+        entries.push(`${act.icon} ${escapeHtml(act.name)}: ${escapeHtml(entry[act.textField])}`);
+      }
+    });
+    if (entries.length) byFamily.push({ family: rec.family, entries });
+  });
+
+  const title = document.createElement("div");
+  title.className = "summary-day-title";
+  title.textContent = "Edades registradas";
+  container.appendChild(title);
+
+  const card = document.createElement("div");
+  card.className = "summary-card";
+  if (byFamily.length === 0) {
+    card.innerHTML = `<div class="summary-empty">Ninguna familia ha registrado edades todavía.</div>`;
+  } else {
+    card.innerHTML = byFamily.map(f => `
+      <div class="summary-card-head"><div class="summary-card-name">${escapeHtml(f.family)}</div></div>
+      <div class="summary-ages">${f.entries.join("<br>")}</div>
+    `).join('<hr style="border:none; border-top:1px dashed var(--border); margin:10px 0;">');
+  }
+  container.appendChild(card);
+}
+
 function renderActivitySummary(records) {
   const container = document.getElementById("adminSummaryView");
   container.innerHTML = "";
+  renderAgesSummary(records);
 
   DAYS.forEach(day => {
     if (day.activities.length === 0) return;

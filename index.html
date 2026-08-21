@@ -70,28 +70,54 @@
     padding-bottom:60px;
     -webkit-font-smoothing:antialiased;
   }
-  h1,h2,h3,.serif{font-family:'Cormorant Garamond',serif;}
+  h1,h2,h3,.serif{font-family:'Cormorant Garamond',serif; text-wrap:balance;}
   a{color:inherit;}
+  button, select, input{font-family:inherit;}
+  button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible{
+    outline:2px solid var(--gold);
+    outline-offset:2px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; animation:none !important;}
+  }
 
   header.top{
     position:relative;
     text-align:center;
-    padding:34px 16px 22px;
+    padding:38px 16px 24px;
     background:linear-gradient(180deg, var(--header-grad-top) 0%, var(--ivory) 100%);
     border-bottom:1px solid var(--border);
   }
   header.top h1{
-    font-size:2.4rem;
+    font-size:2.5rem;
     font-weight:700;
     color:var(--gold-dark);
-    margin:0 0 4px;
+    margin:0 0 10px;
     letter-spacing:0.5px;
   }
+  .header-ornament{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin:0 0 10px;
+    color:var(--gold);
+    opacity:0.8;
+  }
+  .header-ornament::before, .header-ornament::after{
+    content:"";
+    height:1px;
+    width:46px;
+    background:var(--gold);
+    opacity:0.6;
+  }
+  .header-ornament span{font-size:0.7rem; letter-spacing:0.2em;}
   header.top .subtitle{
     font-size:1.05rem;
     color:var(--text);
     opacity:0.75;
     font-weight:500;
+    letter-spacing:0.02em;
   }
   #adminBtn{
     position:absolute;
@@ -111,17 +137,23 @@
 
   .legend{
     max-width:640px;
-    margin:18px auto 0;
-    padding:12px 18px;
+    margin:20px auto 0;
+    padding:0 18px;
     display:flex;
-    gap:22px;
+    gap:10px;
     justify-content:center;
     flex-wrap:wrap;
-    font-size:0.85rem;
+  }
+  .legend span{
+    white-space:nowrap;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:6px 14px;
+    font-size:0.78rem;
     color:var(--text);
     opacity:0.85;
   }
-  .legend span{white-space:nowrap;}
 
   main{max-width:640px; margin:0 auto; padding:18px 14px 0;}
 
@@ -148,7 +180,21 @@
     font-family:'Montserrat',sans-serif;
     font-size:0.95rem;
     color:var(--text);
+    transition:border-color 0.15s ease;
   }
+  select:hover, input[type=text]:hover{border-color:var(--gold);}
+  .editing-note{
+    display:none;
+    margin-top:10px;
+    padding:8px 12px;
+    background:var(--note-bg);
+    border:1px solid var(--note-border);
+    color:var(--note-text);
+    border-radius:8px;
+    font-size:0.78rem;
+    font-weight:600;
+  }
+  .editing-note.show{display:block;}
 
   .day-section{margin-bottom:28px;}
   .day-title{
@@ -190,6 +236,11 @@
     padding:16px;
     margin-bottom:12px;
     box-shadow:var(--shadow);
+    transition:box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .activity-card:hover{
+    border-color:var(--gold);
+    box-shadow:0 4px 16px rgba(58,53,48,0.12);
   }
   .activity-head{
     display:flex;
@@ -231,6 +282,7 @@
     font-family:'Montserrat',sans-serif;
     font-weight:600;
     cursor:pointer;
+    transition:background 0.15s ease, color 0.15s ease;
   }
   .toggle-group button.active{
     background:var(--gold);
@@ -245,7 +297,7 @@
     margin-top:12px;
     padding-top:12px;
     border-top:1px dashed var(--border);
-    gap:10px;
+    gap:14px;
     flex-wrap:wrap;
   }
   .fields-wrap.show{display:flex;}
@@ -258,11 +310,45 @@
     font-size:0.72rem;
     font-weight:600;
     opacity:0.7;
-    margin-bottom:4px;
+    margin-bottom:6px;
     text-transform:uppercase;
     letter-spacing:0.3px;
   }
   .field-item.text-field{flex:1 1 100%;}
+
+  .stepper{
+    display:inline-flex;
+    align-items:center;
+    gap:0;
+    border:1px solid var(--border);
+    border-radius:20px;
+    background:var(--surface);
+    overflow:hidden;
+  }
+  .step-btn{
+    border:none;
+    background:transparent;
+    color:var(--gold-dark);
+    width:30px;
+    height:30px;
+    font-size:1.1rem;
+    line-height:1;
+    font-weight:700;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background 0.15s ease;
+  }
+  .step-btn:hover{background:var(--note-bg);}
+  .step-btn:active{background:var(--gold); color:#fff;}
+  .step-value{
+    min-width:26px;
+    text-align:center;
+    font-weight:700;
+    font-size:0.92rem;
+    font-variant-numeric:tabular-nums;
+  }
 
   .submit-wrap{
     text-align:center;
@@ -279,8 +365,10 @@
     font-family:'Montserrat',sans-serif;
     cursor:pointer;
     box-shadow:0 4px 14px rgba(163,138,95,0.35);
+    transition:background 0.15s ease, transform 0.15s ease;
   }
-  #submitBtn:hover{background:var(--gold-dark);}
+  #submitBtn:hover{background:var(--gold-dark); transform:translateY(-1px);}
+  #submitBtn:active{transform:translateY(0);}
   .req-note{
     font-size:0.78rem;
     opacity:0.6;
@@ -302,21 +390,31 @@
   .modal-box{
     background:var(--card);
     border-radius:var(--radius);
-    padding:26px 22px;
-    max-width:420px;
+    padding:30px 24px;
+    max-width:440px;
     width:100%;
     text-align:center;
     box-shadow:0 10px 40px rgba(0,0,0,0.25);
   }
+  .modal-icon{
+    font-size:2.2rem;
+    margin-bottom:6px;
+  }
   .modal-box h2{
     color:var(--gold-dark);
-    font-size:1.6rem;
-    margin:0 0 10px;
+    font-size:1.7rem;
+    margin:0 0 12px;
   }
   .modal-box p{
-    font-size:0.9rem;
-    line-height:1.5;
-    margin-bottom:20px;
+    font-size:0.92rem;
+    line-height:1.6;
+    margin-bottom:18px;
+  }
+  .modal-subnote{
+    font-size:0.78rem;
+    opacity:0.6;
+    margin-top:-8px;
+    margin-bottom:20px !important;
   }
   .btn-whatsapp{
     display:inline-block;
@@ -327,6 +425,7 @@
     border-radius:24px;
     font-weight:700;
     font-size:0.9rem;
+    transition:background 0.15s ease;
   }
   .btn-whatsapp:hover{background:var(--green-dark);}
   .btn-close-modal{
@@ -339,6 +438,35 @@
     font-size:0.82rem;
     cursor:pointer;
     text-decoration:underline;
+  }
+
+  .edit-link-box{
+    margin-top:22px;
+    padding-top:18px;
+    border-top:1px dashed var(--border);
+    text-align:left;
+  }
+  .edit-link-label{
+    font-size:0.72rem !important;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.3px;
+    opacity:0.6;
+    margin-bottom:8px !important;
+  }
+  .edit-link-row{
+    display:flex;
+    gap:6px;
+  }
+  .edit-link-row input{
+    flex:1;
+    font-size:0.78rem;
+    padding:8px 10px;
+    background:var(--surface);
+  }
+  .edit-link-row button{
+    flex-shrink:0;
+    padding:8px 14px;
   }
 
   /* Admin panel */
@@ -374,6 +502,76 @@
     font-family:'Montserrat',sans-serif;
   }
   .btn-secondary.green{border-color:var(--green); color:var(--green-dark);}
+  .btn-secondary:hover{background:var(--note-bg);}
+
+  .admin-tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+    border-bottom:1px solid var(--border);
+  }
+  .admin-tab-btn{
+    background:transparent;
+    border:none;
+    border-bottom:2px solid transparent;
+    color:var(--text);
+    opacity:0.6;
+    padding:8px 4px 10px;
+    font-size:0.85rem;
+    font-weight:600;
+    font-family:'Montserrat',sans-serif;
+    cursor:pointer;
+  }
+  .admin-tab-btn.active{
+    opacity:1;
+    color:var(--gold-dark);
+    border-bottom-color:var(--gold);
+  }
+
+  .summary-day-title{
+    font-size:1.15rem;
+    font-weight:700;
+    color:var(--gold-dark);
+    margin:20px 0 8px;
+    font-family:'Cormorant Garamond',serif;
+  }
+  .summary-day-title:first-child{margin-top:0;}
+  .summary-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px 14px;
+    margin-bottom:10px;
+  }
+  .summary-card-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .summary-card-name{font-weight:600; font-size:0.88rem;}
+  .summary-stats{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    font-size:0.78rem;
+    font-variant-numeric:tabular-nums;
+  }
+  .summary-stat strong{color:var(--gold-dark);}
+  .summary-ages{
+    margin-top:8px;
+    padding-top:8px;
+    border-top:1px dashed var(--border);
+    font-size:0.76rem;
+    opacity:0.75;
+  }
+  .summary-empty{
+    font-size:0.85rem;
+    opacity:0.6;
+    font-style:italic;
+  }
+
   table.admin-table{
     width:100%;
     border-collapse:collapse;
@@ -410,13 +608,14 @@
 
 <header class="top">
   <button id="adminBtn">Admin</button>
+  <div class="header-ornament"><span>ב״ה</span></div>
   <h1>Marcos Dana</h1>
   <div class="subtitle">Shilo, Israel · 4–9 de Octubre</div>
 </header>
 
 <div class="legend">
-  <span>🎁 = Incluido / ya pagado por la familia</span>
-  <span>🎫 = Cada quien lo paga de forma independiente</span>
+  <span>🎁 Incluido / ya pagado por la familia</span>
+  <span>🎫 Cada quien lo paga de forma independiente</span>
 </div>
 
 <main>
@@ -425,6 +624,7 @@
     <select id="familySelect" required>
       <option value="" disabled selected>-- Elige tu familia --</option>
     </select>
+    <div class="editing-note" id="editingNote"></div>
   </div>
 
   <div id="daysContainer"></div>
@@ -438,9 +638,20 @@
 <!-- Success Modal -->
 <div class="modal-overlay" id="successModal">
   <div class="modal-box">
-    <h2 class="serif">¡Gracias por ser parte de nuestra alegría!</h2>
-    <p>Tu confirmación ha sido guardada con éxito. Si quieres editar, responde nuevamente o contacta a Emily para algún cambio.</p>
+    <div class="modal-icon">✡️</div>
+    <h2 class="serif">¡Su presencia es la mejor bendición!</h2>
+    <p>Reunir a toda la familia en Israel para celebrar el Bar Mitzvá de Marcos es un sueño hecho realidad. Cada uno de ustedes forma parte esencial de este momento tan especial — gracias por confirmar y ser parte de esta alegría que estamos a punto de vivir juntos.</p>
+    <p class="modal-subnote">Si necesitas cambiar algo, vuelve a elegir tu familia en este mismo link y edita tu respuesta cuando quieras.</p>
     <a href="#" id="whatsappBtn" class="btn-whatsapp" target="_blank" rel="noopener">Enviar mi resumen por WhatsApp</a>
+
+    <div class="edit-link-box">
+      <p class="edit-link-label">Guarda este link para editar tu respuesta después</p>
+      <div class="edit-link-row">
+        <input type="text" id="editLinkInput" readonly>
+        <button type="button" class="btn-secondary" id="copyEditLinkBtn">Copiar</button>
+      </div>
+    </div>
+
     <button class="btn-close-modal" id="closeModalBtn">Cerrar</button>
   </div>
 </div>
@@ -456,7 +667,13 @@
     </div>
   </div>
   <div class="admin-status" id="adminStatus"></div>
-  <div class="table-scroll">
+
+  <div class="admin-tabs">
+    <button class="admin-tab-btn active" data-tab="table">Tabla por familia</button>
+    <button class="admin-tab-btn" data-tab="summary">Resumen por actividad</button>
+  </div>
+
+  <div class="table-scroll" id="adminTableView">
     <table class="admin-table" id="adminTable">
       <thead>
         <tr><th>Familia</th><th>Fecha</th><th>Actividades confirmadas</th></tr>
@@ -464,6 +681,8 @@
       <tbody id="adminTableBody"></tbody>
     </table>
   </div>
+
+  <div id="adminSummaryView" style="display:none;"></div>
 </div>
 
 <script>
@@ -568,14 +787,7 @@ FAMILIES.forEach(f => {
 });
 
 const daysContainer = document.getElementById("daysContainer");
-
-function countOptions(selectedVal) {
-  let html = "";
-  for (let i = 0; i <= 5; i++) {
-    html += `<option value="${i}" ${i === selectedVal ? "selected" : ""}>${i}</option>`;
-  }
-  return html;
-}
+const MAX_STEP = 5;
 
 DAYS.forEach(day => {
   const section = document.createElement("section");
@@ -608,7 +820,11 @@ DAYS.forEach(day => {
         html += `
           <div class="field-item">
             <label>${FIELD_LABELS[fkey]}</label>
-            <select data-field="${fkey}" data-activity-field="${act.id}">${countOptions(0)}</select>
+            <div class="stepper" data-field="${fkey}" data-activity-field="${act.id}">
+              <button type="button" class="step-btn step-minus" aria-label="Menos ${FIELD_LABELS[fkey]}">&minus;</button>
+              <span class="step-value" data-value="0">0</span>
+              <button type="button" class="step-btn step-plus" aria-label="Más ${FIELD_LABELS[fkey]}">+</button>
+            </div>
           </div>`;
       });
       if (act.textField) {
@@ -647,6 +863,22 @@ document.querySelectorAll(".toggle-group").forEach(group => {
   });
 });
 
+// Stepper (+/-) behavior — delegated, since steppers are generated dynamically
+function setStepperValue(stepperEl, value) {
+  const clamped = Math.max(0, Math.min(MAX_STEP, value));
+  stepperEl.querySelector(".step-value").textContent = clamped;
+  stepperEl.querySelector(".step-value").dataset.value = clamped;
+}
+
+daysContainer.addEventListener("click", (evt) => {
+  const btn = evt.target.closest(".step-btn");
+  if (!btn) return;
+  const stepperEl = btn.closest(".stepper");
+  const valueEl = stepperEl.querySelector(".step-value");
+  const current = parseInt(valueEl.dataset.value, 10) || 0;
+  setStepperValue(stepperEl, btn.classList.contains("step-plus") ? current + 1 : current - 1);
+});
+
 /* =====================================================================
    HELPERS: build activity id -> config map
    ===================================================================== */
@@ -670,8 +902,8 @@ function collectFormData() {
 
     if (attending && config.type === "counts") {
       config.fields.forEach(fkey => {
-        const el = document.querySelector(`select[data-field="${fkey}"][data-activity-field="${actId}"]`);
-        entry[fkey] = el ? parseInt(el.value, 10) : 0;
+        const el = document.querySelector(`.stepper[data-field="${fkey}"][data-activity-field="${actId}"] .step-value`);
+        entry[fkey] = el ? parseInt(el.dataset.value, 10) || 0 : 0;
       });
       if (config.textField) {
         const el = document.querySelector(`input[data-field="${config.textField}"][data-activity-field="${actId}"]`);
@@ -687,6 +919,82 @@ function collectFormData() {
     activities: activities
   };
 }
+
+/* =====================================================================
+   EDIT LINK + PREFILL — lets a family come back later (or right after
+   submitting) and load their previous response into the form to edit.
+   ===================================================================== */
+function buildEditLink(family) {
+  const url = new URL(window.location.href);
+  url.search = "";
+  url.searchParams.set("family", family);
+  return url.toString();
+}
+
+function populateForm(record) {
+  ACTIVITY_ORDER.forEach(actId => {
+    const config = ACTIVITY_MAP[actId];
+    const entry = record.activities ? record.activities[actId] : null;
+    const attending = !!(entry && entry.attending);
+    const group = document.querySelector(`.toggle-group[data-toggle-for="${actId}"]`);
+    const noBtn = group.querySelector(".opt-no");
+    const yesBtn = group.querySelector(".opt-yes");
+    const fieldsWrap = document.getElementById(`fields_${actId}`);
+
+    if (attending) {
+      yesBtn.classList.add("active", "yes");
+      noBtn.classList.remove("active");
+      if (fieldsWrap) fieldsWrap.classList.add("show");
+    } else {
+      noBtn.classList.add("active");
+      yesBtn.classList.remove("active", "yes");
+      if (fieldsWrap) fieldsWrap.classList.remove("show");
+    }
+
+    if (config.type === "counts") {
+      config.fields.forEach(fkey => {
+        const stepperEl = document.querySelector(`.stepper[data-field="${fkey}"][data-activity-field="${actId}"]`);
+        if (stepperEl) setStepperValue(stepperEl, attending ? (entry[fkey] || 0) : 0);
+      });
+      if (config.textField) {
+        const input = document.querySelector(`input[data-field="${config.textField}"][data-activity-field="${actId}"]`);
+        if (input) input.value = attending ? (entry[config.textField] || "") : "";
+      }
+    }
+  });
+}
+
+async function loadExistingResponse(family) {
+  const editingNote = document.getElementById("editingNote");
+  editingNote.classList.remove("show");
+  if (!family) return;
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, { method: "GET" });
+    const data = await res.json();
+    const record = (Array.isArray(data) ? data : []).find(r => r.family === family);
+    if (record) {
+      populateForm(record);
+      editingNote.textContent = `Ya tienes una respuesta guardada para "${family}" — la cargamos aquí para que la edites.`;
+      editingNote.classList.add("show");
+    }
+  } catch (err) {
+    console.warn("No se pudo cargar la respuesta previa.", err);
+  }
+}
+
+familySelect.addEventListener("change", () => {
+  familySelect.style.borderColor = "";
+  loadExistingResponse(familySelect.value);
+});
+
+// Si llegan con un link de edición (?family=...), preseleccionamos y cargamos su respuesta.
+(() => {
+  const prefillFamily = new URLSearchParams(window.location.search).get("family");
+  if (prefillFamily && FAMILIES.includes(prefillFamily)) {
+    familySelect.value = prefillFamily;
+    loadExistingResponse(prefillFamily);
+  }
+})();
 
 /* =====================================================================
    LOCAL STORAGE (per-device backup, upsert by family)
@@ -765,6 +1073,8 @@ function buildWhatsappSummary(record) {
     lines.push("");
   });
 
+  lines.push(`Para editar mi respuesta: ${buildEditLink(record.family)}`);
+
   return lines.join("\n");
 }
 
@@ -772,11 +1082,26 @@ function showSuccessModal(record) {
   const summary = buildWhatsappSummary(record);
   const waLink = "https://wa.me/?text=" + encodeURIComponent(summary);
   document.getElementById("whatsappBtn").setAttribute("href", waLink);
+  document.getElementById("editLinkInput").value = buildEditLink(record.family);
   document.getElementById("successModal").classList.add("show");
 }
 
 document.getElementById("closeModalBtn").addEventListener("click", () => {
   document.getElementById("successModal").classList.remove("show");
+});
+
+document.getElementById("copyEditLinkBtn").addEventListener("click", async () => {
+  const input = document.getElementById("editLinkInput");
+  const btn = document.getElementById("copyEditLinkBtn");
+  try {
+    await navigator.clipboard.writeText(input.value);
+  } catch (err) {
+    input.select();
+    document.execCommand("copy");
+  }
+  const original = btn.textContent;
+  btn.textContent = "¡Copiado!";
+  setTimeout(() => { btn.textContent = original; }, 1500);
 });
 
 /* =====================================================================
@@ -866,6 +1191,7 @@ async function refreshAdminView() {
     const data = await res.json();
     lastAdminRecords = (Array.isArray(data) ? data : []).sort((a, b) => (a.family || "").localeCompare(b.family || ""));
     renderAdminTable(lastAdminRecords);
+    renderActivitySummary(lastAdminRecords);
     adminStatus.textContent = lastAdminRecords.length === 0
       ? "No hay confirmaciones registradas todavía."
       : `${lastAdminRecords.length} familia(s) han confirmado.`;
@@ -892,6 +1218,16 @@ document.getElementById("closeAdminBtn").addEventListener("click", () => {
 
 document.getElementById("refreshAdminBtn").addEventListener("click", refreshAdminView);
 
+document.querySelectorAll(".admin-tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".admin-tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    const isTable = btn.dataset.tab === "table";
+    document.getElementById("adminTableView").style.display = isTable ? "" : "none";
+    document.getElementById("adminSummaryView").style.display = isTable ? "none" : "";
+  });
+});
+
 document.getElementById("exportCsvBtn").addEventListener("click", () => {
   if (!lastAdminRecords || lastAdminRecords.length === 0) {
     alert("No hay datos para exportar todavía.");
@@ -901,19 +1237,25 @@ document.getElementById("exportCsvBtn").addEventListener("click", () => {
   triggerCsvDownload(content, `RSVP_Marcos_Dana_${new Date().toISOString().slice(0, 10)}.csv`);
 });
 
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str == null ? "" : String(str);
+  return div.innerHTML;
+}
+
 function activitySummaryHtml(record) {
   const parts = [];
   DAYS.forEach(day => {
     day.activities.forEach(act => {
       const entry = record.activities ? record.activities[act.id] : null;
       if (!entry || !entry.attending) return;
-      let text = `${act.icon} ${act.name}`;
+      let text = `${act.icon} ${escapeHtml(act.name)}`;
       if (act.type === "counts") {
         const details = [];
         (act.fields || []).forEach(fkey => {
           if (entry[fkey]) details.push(`${FIELD_LABELS[fkey]}: ${entry[fkey]}`);
         });
-        if (act.textField && entry[act.textField]) details.push(`${FIELD_LABELS[act.textField]}: ${entry[act.textField]}`);
+        if (act.textField && entry[act.textField]) details.push(`${FIELD_LABELS[act.textField]}: ${escapeHtml(entry[act.textField])}`);
         if (details.length) text += ` (${details.join(", ")})`;
       }
       parts.push(text);
@@ -928,11 +1270,69 @@ function renderAdminTable(records) {
     const tr = document.createElement("tr");
     const fecha = rec.timestamp ? new Date(rec.timestamp).toLocaleString("es-MX") : "";
     tr.innerHTML = `
-      <td>${rec.family || ""}</td>
+      <td>${escapeHtml(rec.family)}</td>
       <td>${fecha}</td>
       <td>${activitySummaryHtml(rec)}</td>
     `;
     adminTableBody.appendChild(tr);
+  });
+}
+
+function renderActivitySummary(records) {
+  const container = document.getElementById("adminSummaryView");
+  container.innerHTML = "";
+
+  DAYS.forEach(day => {
+    if (day.activities.length === 0) return;
+    const dayTitle = document.createElement("div");
+    dayTitle.className = "summary-day-title";
+    dayTitle.textContent = day.title;
+    container.appendChild(dayTitle);
+
+    day.activities.forEach(act => {
+      let families = 0, adultos = 0, ninos = 0, infantes = 0, carSeats = 0;
+      const edadesList = [];
+
+      records.forEach(rec => {
+        const entry = rec.activities ? rec.activities[act.id] : null;
+        if (!entry || !entry.attending) return;
+        families++;
+        if (act.type === "counts") {
+          adultos += entry.adultos || 0;
+          ninos += entry.ninos || 0;
+          infantes += entry.infantes || 0;
+          carSeats += entry.car_seats || 0;
+          if (act.textField && entry[act.textField]) {
+            edadesList.push(`${rec.family}: ${entry[act.textField]}`);
+          }
+        }
+      });
+
+      const card = document.createElement("div");
+      card.className = "summary-card";
+
+      if (families === 0) {
+        card.innerHTML = `
+          <div class="summary-card-head"><div class="summary-card-name">${act.icon} ${escapeHtml(act.name)}</div></div>
+          <div class="summary-empty">Sin confirmaciones todavía</div>`;
+        container.appendChild(card);
+        return;
+      }
+
+      const totalPeople = adultos + ninos + infantes;
+      let statsHtml = `<div class="summary-stat"><strong>${families}</strong> familia(s)</div>`;
+      if (act.type === "counts") {
+        statsHtml += `<div class="summary-stat"><strong>${totalPeople}</strong> persona(s) — ${adultos} adultos · ${ninos} niños · ${infantes} infantes</div>`;
+        if (carSeats > 0) statsHtml += `<div class="summary-stat"><strong>${carSeats}</strong> car seat(s)</div>`;
+      }
+
+      card.innerHTML = `
+        <div class="summary-card-head"><div class="summary-card-name">${act.icon} ${escapeHtml(act.name)}</div></div>
+        <div class="summary-stats">${statsHtml}</div>
+        ${edadesList.length ? `<div class="summary-ages"><strong>Edades:</strong> ${edadesList.map(escapeHtml).join(" · ")}</div>` : ""}
+      `;
+      container.appendChild(card);
+    });
   });
 }
 

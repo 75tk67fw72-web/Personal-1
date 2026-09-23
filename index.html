@@ -591,6 +591,15 @@
     text-transform:uppercase;
     letter-spacing:0.3px;
   }
+  .matrix-act-name{
+    font-size:0.66rem;
+    font-weight:700;
+    line-height:1.25;
+    white-space:normal;
+    max-width:92px;
+    color:var(--gold-dark);
+    vertical-align:bottom;
+  }
   .matrix-act-head{
     font-size:0.9rem;
     white-space:nowrap;
@@ -602,6 +611,20 @@
   .matrix-no{opacity:0.4;}
   .matrix-none{opacity:0.25;}
   .matrix-row-empty .matrix-family{opacity:0.55; font-style:italic;}
+
+  table.admin-table.matrix-table tfoot th.matrix-corner{background:var(--th-bg);}
+  .matrix-total-row td.matrix-total-cell{
+    background:var(--th-bg);
+    font-variant-numeric:tabular-nums;
+  }
+  .matrix-total-general td.matrix-total-cell{background:var(--note-bg); color:var(--gold-dark);}
+  table.admin-table.matrix-table tfoot tr.matrix-total-general th.matrix-corner{background:var(--note-bg); color:var(--gold-dark);}
+  .matrix-ages-cell{
+    white-space:normal;
+    font-size:0.66rem;
+    max-width:92px;
+    line-height:1.25;
+  }
 
   table.admin-table{
     width:100%;
@@ -756,10 +779,10 @@ const DAYS = [
     info: ["Salida caminando al Kotel", "Comida en la Ciudad Vieja", "Opcional: Biblioteca Nacional, Shuk Mahane Yehuda, Ben Yehuda"],
     note: null,
     activities: [
-      { id: "tunnels_kotel", time: "12:10", name: "Túneles Nuevos del Kotel", icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"] },
-      { id: "look_into_past", time: "13:40", name: '"A Look Into the Past"', icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"] },
-      { id: "pelicula_gateway", time: "14:30", name: 'Película "Gateway to Heaven"', icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"] },
-      { id: "tour_ciudad_vieja", time: "Tarde", name: "Tour guiado por la Ciudad Vieja", icon: "🎁", type: "simple" }
+      { id: "tunnels_kotel", time: "12:10", name: "Túneles Nuevos del Kotel", short: "Túneles Kotel", icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"] },
+      { id: "look_into_past", time: "13:40", name: '"A Look Into the Past"', short: "Look Into Past", icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"] },
+      { id: "pelicula_gateway", time: "14:30", name: 'Película "Gateway to Heaven"', short: "Gateway to Heaven", icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"] },
+      { id: "tour_ciudad_vieja", time: "Tarde", name: "Tour guiado por la Ciudad Vieja", short: "Tour Ciudad Vieja", icon: "🎁", type: "simple" }
     ]
   },
   {
@@ -768,8 +791,8 @@ const DAYS = [
     info: ["Mañana: rezo y desayuno en Aish", "Comida ligera"],
     note: null,
     activities: [
-      { id: "pantry_packers", time: "12:30", name: "Voluntariado en Pantry Packers", icon: "🎁", type: "counts", fields: ["adultos", "ninos", "infantes"] },
-      { id: "cena_pitmaster", time: "20:00", name: "Cena en Pitmaster", icon: "🎫", type: "simple", sub: "Cada quien lo paga" }
+      { id: "pantry_packers", time: "12:30", name: "Voluntariado en Pantry Packers", short: "Pantry Packers", icon: "🎁", type: "counts", fields: ["adultos", "ninos", "infantes"] },
+      { id: "cena_pitmaster", time: "20:00", name: "Cena en Pitmaster", short: "Cena Pitmaster", icon: "🎫", type: "simple", sub: "Cada quien lo paga" }
     ]
   },
   {
@@ -778,7 +801,7 @@ const DAYS = [
     info: ["10:00 Salida a Ein Guedi y Kalia Beach"],
     note: "Llevar traje de baño y cambio de ropa",
     activities: [
-      { id: "eretz_beresheet", time: "16:45", name: "Eretz Beresheet", icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"], sub: "Con camellos, pita, comida y círculo de tambores" }
+      { id: "eretz_beresheet", time: "16:45", name: "Eretz Beresheet", short: "Eretz Beresheet", icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"], sub: "Con camellos, pita, comida y círculo de tambores" }
     ]
   },
   {
@@ -787,8 +810,8 @@ const DAYS = [
     info: ["Visita a una base militar antes de Caliber 3", "Comida ligera"],
     note: "Llevar fotos de pasaporte, ropa cómoda y tenis",
     activities: [
-      { id: "caliber3", time: "14:50", name: "Caliber 3", icon: "🎫", type: "counts", fields: ["adultos", "ninos"], textField: "edades" },
-      { id: "ez_raiders", time: "18:15", name: "Ez Raiders", icon: "🎫", type: "counts", fields: ["adultos", "ninos"], textField: "edades" }
+      { id: "caliber3", time: "14:50", name: "Caliber 3", short: "Caliber 3", icon: "🎫", type: "counts", fields: ["adultos", "ninos"], textField: "edades" },
+      { id: "ez_raiders", time: "18:15", name: "Ez Raiders", short: "Ez Raiders", icon: "🎫", type: "counts", fields: ["adultos", "ninos"], textField: "edades" }
     ]
   },
   {
@@ -797,7 +820,7 @@ const DAYS = [
     info: ["Mañana: Darbukas desde el hotel, rezo en el Kotel (zona mixta) y desayuno en tablones", "20:00 Regreso a Jerusalem"],
     note: "Vestimenta sugerida para el evento: Blanco / Beige",
     activities: [
-      { id: "shilo_fiesta", time: "11:30 / 13:30 / 16:00", name: "Salida | Shilo Guiado con Música & Comida en Viñedo Shilo", icon: "🎁", type: "counts", fields: ["adultos", "ninos", "infantes"] }
+      { id: "shilo_fiesta", time: "11:30 / 13:30 / 16:00", name: "Salida | Shilo Guiado con Música & Comida en Viñedo Shilo", short: "Shilo", icon: "🎁", type: "counts", fields: ["adultos", "ninos", "infantes"] }
     ]
   },
   {
@@ -1417,51 +1440,99 @@ function renderMatrixView(records) {
     return;
   }
 
+  const flatActs = [];
+  activityDays.forEach(day => day.activities.forEach(act => flatActs.push(act)));
+
   const recordByFamily = {};
   records.forEach(rec => { recordByFamily[rec.family] = rec; });
 
   let html = '<table class="admin-table matrix-table"><thead>';
+
   html += '<tr><th class="matrix-corner"></th>';
   activityDays.forEach(day => {
     html += `<th colspan="${day.activities.length}" class="matrix-day-head">${escapeHtml(day.title.replace(/ — .*$/, ""))}</th>`;
   });
-  html += '</tr><tr><th class="matrix-corner">Familia</th>';
-  activityDays.forEach(day => {
-    day.activities.forEach(act => {
-      html += `<th class="matrix-act-head" title="${escapeHtml(act.name)} · ${escapeHtml(act.time)}">${act.icon}<br>${escapeHtml(act.time)}</th>`;
-    });
+  html += '</tr>';
+
+  html += '<tr><th class="matrix-corner">Actividad</th>';
+  flatActs.forEach(act => {
+    html += `<th class="matrix-act-name" title="${escapeHtml(act.name)}">${escapeHtml(act.short || act.name)}</th>`;
+  });
+  html += '</tr>';
+
+  html += '<tr><th class="matrix-corner">Familia</th>';
+  flatActs.forEach(act => {
+    html += `<th class="matrix-act-head" title="${escapeHtml(act.name)} · ${escapeHtml(act.time)}">${act.icon}<br>${escapeHtml(act.time)}</th>`;
   });
   html += '</tr></thead><tbody>';
 
   FAMILIES.forEach(family => {
     const rec = recordByFamily[family];
     html += `<tr${rec ? "" : ' class="matrix-row-empty"'}><td class="matrix-family">${escapeHtml(family)}</td>`;
-    activityDays.forEach(day => {
-      day.activities.forEach(act => {
-        const entry = rec && rec.activities ? rec.activities[act.id] : null;
-        if (!rec) {
-          html += `<td class="matrix-cell matrix-none" title="Sin respuesta">·</td>`;
-        } else if (entry && entry.attending) {
-          if (act.type === "counts") {
-            const total = (entry.adultos || 0) + (entry.ninos || 0) + (entry.infantes || 0);
-            const detail = [
-              entry.adultos ? `${entry.adultos}A` : "",
-              entry.ninos ? `${entry.ninos}N` : "",
-              entry.infantes ? `${entry.infantes}I` : ""
-            ].filter(Boolean).join(" ");
-            html += `<td class="matrix-cell matrix-yes" title="${escapeHtml(detail || String(total))}"><strong>${total}</strong></td>`;
-          } else {
-            html += `<td class="matrix-cell matrix-yes" title="Confirmado">✓</td>`;
-          }
+    flatActs.forEach(act => {
+      const entry = rec && rec.activities ? rec.activities[act.id] : null;
+      if (!rec) {
+        html += `<td class="matrix-cell matrix-none" title="Sin respuesta">·</td>`;
+      } else if (entry && entry.attending) {
+        if (act.type === "counts") {
+          const total = (entry.adultos || 0) + (entry.ninos || 0) + (entry.infantes || 0);
+          const detail = [
+            entry.adultos ? `${entry.adultos}A` : "",
+            entry.ninos ? `${entry.ninos}N` : "",
+            entry.infantes ? `${entry.infantes}I` : ""
+          ].filter(Boolean).join(" ");
+          html += `<td class="matrix-cell matrix-yes" title="${escapeHtml(detail || String(total))}"><strong>${total}</strong></td>`;
         } else {
-          html += `<td class="matrix-cell matrix-no" title="No asiste">–</td>`;
+          html += `<td class="matrix-cell matrix-yes" title="Confirmado">✓</td>`;
         }
-      });
+      } else {
+        html += `<td class="matrix-cell matrix-no" title="No asiste">–</td>`;
+      }
     });
     html += '</tr>';
   });
 
-  html += '</tbody></table>';
+  html += '</tbody>';
+
+  // Totals footer: adultos, niños, total general y edades por actividad
+  const totals = flatActs.map(act => {
+    let adultos = 0, ninos = 0, infantes = 0, families = 0;
+    const edadesList = [];
+    records.forEach(rec => {
+      const entry = rec.activities ? rec.activities[act.id] : null;
+      if (!entry || !entry.attending) return;
+      families++;
+      if (act.type === "counts") {
+        adultos += entry.adultos || 0;
+        ninos += entry.ninos || 0;
+        infantes += entry.infantes || 0;
+        if (act.textField && entry[act.textField]) edadesList.push(entry[act.textField]);
+      }
+    });
+    return { type: act.type, adultos, ninos, infantes, families, edadesList };
+  });
+
+  html += '<tfoot>';
+  html += '<tr class="matrix-total-row"><th class="matrix-corner">Adultos</th>';
+  totals.forEach(t => { html += `<td class="matrix-total-cell">${t.type === "counts" ? t.adultos : "—"}</td>`; });
+  html += '</tr>';
+  html += '<tr class="matrix-total-row"><th class="matrix-corner">Niños</th>';
+  totals.forEach(t => { html += `<td class="matrix-total-cell">${t.type === "counts" ? t.ninos : "—"}</td>`; });
+  html += '</tr>';
+  html += '<tr class="matrix-total-row matrix-total-general"><th class="matrix-corner">Total</th>';
+  totals.forEach(t => {
+    const total = t.type === "counts" ? (t.adultos + t.ninos + t.infantes) : t.families;
+    html += `<td class="matrix-total-cell"><strong>${total}</strong></td>`;
+  });
+  html += '</tr>';
+  html += '<tr class="matrix-total-row matrix-total-ages"><th class="matrix-corner">Edades</th>';
+  totals.forEach(t => {
+    const joined = t.edadesList.join(", ");
+    html += `<td class="matrix-total-cell matrix-ages-cell" title="${escapeHtml(joined)}">${joined ? escapeHtml(joined) : "—"}</td>`;
+  });
+  html += '</tr>';
+  html += '</tfoot></table>';
+
   container.innerHTML = html;
 }
 

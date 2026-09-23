@@ -572,6 +572,37 @@
     font-style:italic;
   }
 
+  .matrix-table{font-size:0.76rem;}
+  table.admin-table.matrix-table th,
+  table.admin-table.matrix-table td{padding:6px 8px; text-align:center;}
+  table.admin-table.matrix-table th.matrix-corner,
+  table.admin-table.matrix-table td.matrix-family{
+    text-align:left;
+    position:sticky;
+    left:0;
+    background:var(--card);
+    z-index:1;
+  }
+  table.admin-table.matrix-table thead th.matrix-corner{background:var(--th-bg); z-index:2;}
+  .matrix-family{font-weight:600; white-space:nowrap;}
+  .matrix-day-head{
+    background:var(--th-bg);
+    font-size:0.68rem;
+    text-transform:uppercase;
+    letter-spacing:0.3px;
+  }
+  .matrix-act-head{
+    font-size:0.9rem;
+    white-space:nowrap;
+    min-width:44px;
+  }
+  .matrix-act-head br + *{font-size:0.62rem;}
+  .matrix-cell{font-variant-numeric:tabular-nums;}
+  table.admin-table.matrix-table td.matrix-yes{background:var(--note-bg); color:var(--gold-dark); font-weight:700;}
+  .matrix-no{opacity:0.4;}
+  .matrix-none{opacity:0.25;}
+  .matrix-row-empty .matrix-family{opacity:0.55; font-style:italic;}
+
   table.admin-table{
     width:100%;
     border-collapse:collapse;
@@ -671,6 +702,7 @@
   <div class="admin-tabs">
     <button class="admin-tab-btn active" data-tab="table">Tabla por familia</button>
     <button class="admin-tab-btn" data-tab="summary">Resumen por actividad</button>
+    <button class="admin-tab-btn" data-tab="matrix">Matriz</button>
   </div>
 
   <div class="table-scroll" id="adminTableView">
@@ -683,6 +715,7 @@
   </div>
 
   <div id="adminSummaryView" style="display:none;"></div>
+  <div class="table-scroll" id="adminMatrixView" style="display:none;"></div>
 </div>
 
 <script>
@@ -720,21 +753,22 @@ const DAYS = [
   {
     title: "DOMINGO 4 DE OCTUBRE",
     location: "Jerusalem",
-    info: [],
+    info: ["Salida caminando al Kotel", "Comida en la Ciudad Vieja", "Opcional: Biblioteca Nacional, Shuk Mahane Yehuda, Ben Yehuda"],
     note: null,
     activities: [
-      { id: "tour_ciudad_vieja", time: "12:00", name: "Tour guiado por la Ciudad Vieja", icon: "🎁", type: "simple" },
-      { id: "pelicula_gateway", time: "14:00", name: 'Película "Gateway to Heaven"', icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"] }
+      { id: "tunnels_kotel", time: "12:10", name: "Túneles Nuevos del Kotel", icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"] },
+      { id: "look_into_past", time: "13:40", name: '"A Look Into the Past"', icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"] },
+      { id: "pelicula_gateway", time: "14:30", name: 'Película "Gateway to Heaven"', icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"] },
+      { id: "tour_ciudad_vieja", time: "Tarde", name: "Tour guiado por la Ciudad Vieja", icon: "🎁", type: "simple" }
     ]
   },
   {
     title: "LUNES 5 DE OCTUBRE",
     location: "Jerusalem",
-    info: ["08:00 Rezo en Aish / Desayuno libre"],
+    info: ["Mañana: rezo y desayuno en Aish", "Comida ligera"],
     note: null,
     activities: [
       { id: "pantry_packers", time: "12:30", name: "Voluntariado en Pantry Packers", icon: "🎁", type: "counts", fields: ["adultos", "ninos", "infantes"] },
-      { id: "ez_raiders", time: "17:00", name: "Ez Raiders", icon: "🎫", type: "counts", fields: ["adultos", "ninos"], textField: "edades" },
       { id: "cena_pitmaster", time: "20:00", name: "Cena en Pitmaster", icon: "🎫", type: "simple", sub: "Cada quien lo paga" }
     ]
   },
@@ -742,24 +776,25 @@ const DAYS = [
     title: "MARTES 6 DE OCTUBRE",
     location: "Mar Muerto y Eretz Beresheet",
     info: ["10:00 Salida a Ein Guedi y Kalia Beach"],
-    note: null,
+    note: "Llevar traje de baño y cambio de ropa",
     activities: [
       { id: "eretz_beresheet", time: "16:45", name: "Eretz Beresheet", icon: "🎫", type: "counts", fields: ["adultos", "ninos", "infantes"], sub: "Con camellos, pita, comida y círculo de tambores" }
     ]
   },
   {
     title: "MIÉRCOLES 7 DE OCTUBRE",
-    location: "Gush Etzion",
-    info: ["Comida ligera / Pizzas con Hayalim — donativo directo allá"],
-    note: null,
+    location: "",
+    info: ["Visita a una base militar antes de Caliber 3", "Comida ligera"],
+    note: "Llevar fotos de pasaporte, ropa cómoda y tenis",
     activities: [
-      { id: "caliber3", time: "11:00", name: "Caliber 3", icon: "🎫", type: "counts", fields: ["adultos", "ninos"], textField: "edades" }
+      { id: "caliber3", time: "14:50", name: "Caliber 3", icon: "🎫", type: "counts", fields: ["adultos", "ninos"], textField: "edades" },
+      { id: "ez_raiders", time: "18:15", name: "Ez Raiders", icon: "🎫", type: "counts", fields: ["adultos", "ninos"], textField: "edades" }
     ]
   },
   {
     title: "JUEVES 8 DE OCTUBRE — Día del Bar Mitzvá",
     location: "Shilo",
-    info: ["Mañana: Darbukas desde el hotel, rezo en el Kotel y desayuno chico"],
+    info: ["Mañana: Darbukas desde el hotel, rezo en el Kotel (zona mixta) y desayuno en tablones", "20:00 Regreso a Jerusalem"],
     note: "Vestimenta sugerida para el evento: Blanco / Beige",
     activities: [
       { id: "shilo_fiesta", time: "11:30 / 13:30 / 16:00", name: "Salida | Shilo Guiado con Música & Comida en Viñedo Shilo", icon: "🎁", type: "counts", fields: ["adultos", "ninos", "infantes"] }
@@ -1191,6 +1226,7 @@ async function refreshAdminView() {
     lastAdminRecords = (Array.isArray(data) ? data : []).sort((a, b) => (a.family || "").localeCompare(b.family || ""));
     renderAdminTable(lastAdminRecords);
     renderActivitySummary(lastAdminRecords);
+    renderMatrixView(lastAdminRecords);
     adminStatus.textContent = lastAdminRecords.length === 0
       ? "No hay confirmaciones registradas todavía."
       : `${lastAdminRecords.length} familia(s) han confirmado.`;
@@ -1221,9 +1257,10 @@ document.querySelectorAll(".admin-tab-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".admin-tab-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
-    const isTable = btn.dataset.tab === "table";
-    document.getElementById("adminTableView").style.display = isTable ? "" : "none";
-    document.getElementById("adminSummaryView").style.display = isTable ? "none" : "";
+    const tab = btn.dataset.tab;
+    document.getElementById("adminTableView").style.display = tab === "table" ? "" : "none";
+    document.getElementById("adminSummaryView").style.display = tab === "summary" ? "" : "none";
+    document.getElementById("adminMatrixView").style.display = tab === "matrix" ? "" : "none";
   });
 });
 
@@ -1370,6 +1407,62 @@ function renderActivitySummary(records) {
       container.appendChild(card);
     });
   });
+}
+
+function renderMatrixView(records) {
+  const container = document.getElementById("adminMatrixView");
+  const activityDays = DAYS.filter(d => d.activities.length > 0);
+  if (activityDays.length === 0) {
+    container.innerHTML = `<div class="summary-empty">No hay actividades configuradas.</div>`;
+    return;
+  }
+
+  const recordByFamily = {};
+  records.forEach(rec => { recordByFamily[rec.family] = rec; });
+
+  let html = '<table class="admin-table matrix-table"><thead>';
+  html += '<tr><th class="matrix-corner"></th>';
+  activityDays.forEach(day => {
+    html += `<th colspan="${day.activities.length}" class="matrix-day-head">${escapeHtml(day.title.replace(/ — .*$/, ""))}</th>`;
+  });
+  html += '</tr><tr><th class="matrix-corner">Familia</th>';
+  activityDays.forEach(day => {
+    day.activities.forEach(act => {
+      html += `<th class="matrix-act-head" title="${escapeHtml(act.name)} · ${escapeHtml(act.time)}">${act.icon}<br>${escapeHtml(act.time)}</th>`;
+    });
+  });
+  html += '</tr></thead><tbody>';
+
+  FAMILIES.forEach(family => {
+    const rec = recordByFamily[family];
+    html += `<tr${rec ? "" : ' class="matrix-row-empty"'}><td class="matrix-family">${escapeHtml(family)}</td>`;
+    activityDays.forEach(day => {
+      day.activities.forEach(act => {
+        const entry = rec && rec.activities ? rec.activities[act.id] : null;
+        if (!rec) {
+          html += `<td class="matrix-cell matrix-none" title="Sin respuesta">·</td>`;
+        } else if (entry && entry.attending) {
+          if (act.type === "counts") {
+            const total = (entry.adultos || 0) + (entry.ninos || 0) + (entry.infantes || 0);
+            const detail = [
+              entry.adultos ? `${entry.adultos}A` : "",
+              entry.ninos ? `${entry.ninos}N` : "",
+              entry.infantes ? `${entry.infantes}I` : ""
+            ].filter(Boolean).join(" ");
+            html += `<td class="matrix-cell matrix-yes" title="${escapeHtml(detail || String(total))}"><strong>${total}</strong></td>`;
+          } else {
+            html += `<td class="matrix-cell matrix-yes" title="Confirmado">✓</td>`;
+          }
+        } else {
+          html += `<td class="matrix-cell matrix-no" title="No asiste">–</td>`;
+        }
+      });
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
 }
 
 </script>

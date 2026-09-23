@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<title>CHMD Committee Scoring</title>
+<style>
+  :root{
+    --navy:#1B3858;
+    --navy-2:#264a70;
+    --gold:#C9A84C;
+    --gold-soft:#F6EFD9;
+    --dan:#1A5276;
+    --dan-soft:#E3EDF5;
+    --lila:#1E8449;
+    --lila-soft:#E2F2E8;
+    --bg:#F4F6F9;
+    --card:#FFFFFF;
+    --text:#1F2937;
+    --muted:#6B7280;
+    --border:#E2E6EC;
+    --danger:#B42318;
+    --radius:14px;
+    --shadow:0 1px 3px rgba(16,24,40,.06),0 4px 14px rgba(16,24,40,.05);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.45;font-size:16px;
+    -webkit-font-smoothing:antialiased;
+  }
+  button,input,textarea{font:inherit;color:inherit}
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px 48px}
+
+  /* Header */
+  header.brand{background:var(--navy);color:#fff;border-bottom:4px solid var(--gold)}
+  header.brand .wrap{padding-top:18px;padding-bottom:16px;display:flex;align-items:center;gap:12px}
+  .logo{width:42px;height:42px;border-radius:50%;border:2px solid var(--gold);display:grid;place-items:center;flex:none;color:var(--gold);font-weight:700;font-size:20px}
+  .brand h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.2px}
+  .brand p{margin:2px 0 0;font-size:13px;color:#cfd8e3}
+  .demo-banner{background:#FFF4E5;color:#8A4B00;font-size:13px;text-align:center;padding:8px 16px;border-bottom:1px solid #F5D7A8}
+
+  /* Progress */
+  .progress{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 0 10px;border-bottom:1px solid var(--border);margin-bottom:16px}
+  .progress .row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:6px}
+  .progress .row b{color:var(--navy)}
+  .bar{height:6px;background:#dfe4eb;border-radius:4px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--gold);width:0;transition:width .25s}
+
+  /* Cards */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin:14px 0}
+  .card h2{margin:0 0 6px;font-size:20px;color:var(--navy)}
+  .card h3{margin:0;font-size:16px;color:var(--navy)}
+  .lead{color:var(--muted);margin:0 0 4px;font-size:15px}
+  .section-title{font-size:13px;letter-spacing:.8px;text-transform:uppercase;color:var(--gold);font-weight:700;margin:24px 0 4px}
+
+  label.fld{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
+  input[type=text],input[type=password],textarea{
+    width:100%;border:1px solid #cdd4de;border-radius:10px;padding:12px 14px;background:#fff;font-size:16px;
+  }
+  textarea{resize:vertical;min-height:64px}
+  input:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold)}
+
+  .btn{appearance:none;border:0;border-radius:10px;padding:13px 18px;font-weight:700;font-size:16px;cursor:pointer;background:var(--navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+  .btn:hover{background:var(--navy-2)}
+  .btn.gold{background:var(--gold);color:var(--navy)}
+  .btn.ghost{background:transparent;color:var(--navy);border:1px solid #cdd4de}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .btn.danger{background:transparent;color:var(--danger);border:1px solid #f1c3bf}
+  .btn[disabled]{opacity:.55;cursor:not-allowed}
+  .nav{display:flex;gap:10px;margin-top:20px}
+  .nav .btn{flex:1}
+
+  /* Criterion card */
+  .crit{position:relative}
+  .crit.missing{border-color:var(--danger);box-shadow:0 0 0 2px rgba(180,35,24,.15)}
+  .crit.key{border:2px solid var(--gold);background:linear-gradient(0deg,#fff,#fff) padding-box}
+  .crit .head{display:flex;align-items:flex-start;gap:10px;justify-content:space-between}
+  .crit .num{font-weight:700;color:var(--gold);margin-right:4px}
+  .weight{flex:none;font-size:12px;font-weight:700;background:#EEF1F5;color:var(--navy);padding:4px 8px;border-radius:999px}
+  .crit.key .weight{background:var(--gold);color:var(--navy)}
+  .flag{display:inline-block;margin:8px 0 0;font-size:12px;font-weight:700;color:#7a5c12;background:var(--gold-soft);border:1px solid #ead9a6;border-radius:6px;padding:3px 8px}
+  .desc{color:var(--muted);font-size:14px;margin:8px 0 12px}
+  .cand-row{display:grid;grid-template-columns:72px 1fr;align-items:center;gap:10px;margin:8px 0}
+  .cand-name{font-weight:700;font-size:14px}
+  .cand-name.dan{color:var(--dan)} .cand-name.lila{color:var(--lila)}
+  .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .scale button{border:1px solid #cdd4de;background:#fff;border-radius:9px;height:44px;font-weight:700;cursor:pointer;font-size:16px}
+  .scale.dan button.on{background:var(--dan);border-color:var(--dan);color:#fff}
+  .scale.lila button.on{background:var(--lila);border-color:var(--lila);color:#fff}
+  .legend{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:2px 0 0 82px}
+  .note{margin-top:10px}
+  .note textarea{min-height:44px;font-size:15px;padding:10px 12px}
+
+  /* Choice buttons */
+  .q{font-weight:600;margin:0 0 10px}
+  .choice{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .choice button{border:2px solid #cdd4de;background:#fff;border-radius:12px;padding:14px 8px;font-weight:700;cursor:pointer;font-size:16px}
+  .choice button.dan{color:var(--dan)} .choice button.lila{color:var(--lila)}
+  .choice button.dan.on{background:var(--dan);border-color:var(--dan);color:#fff}
+  .choice button.lila.on{background:var(--lila);border-color:var(--lila);color:#fff}
+  .choice.big button{padding:22px 8px;font-size:20px}
+
+  .lines input{margin-bottom:8px}
+  .err{color:var(--danger);font-size:14px;margin-top:10px;min-height:1em}
+  .muted{color:var(--muted)}
+  .center{text-align:center}
+  .thanks{padding:36px 22px}
+  .thanks .check{width:64px;height:64px;border-radius:50%;background:var(--gold-soft);border:2px solid var(--gold);display:grid;place-items:center;margin:0 auto 14px;font-size:30px;color:var(--navy)}
+
+  footer{text-align:center;font-size:12px;color:var(--muted);padding:24px 16px 36px}
+  footer a{color:var(--muted)}
+
+  /* Dashboard */
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .kpi{border-radius:var(--radius);padding:16px;color:#fff}
+  .kpi.dan{background:var(--dan)} .kpi.lila{background:var(--lila)}
+  .kpi .lbl{font-size:13px;opacity:.9}
+  .kpi .val{font-size:34px;font-weight:800;line-height:1.1;margin-top:4px}
+  .kpi .val small{font-size:15px;font-weight:600;opacity:.85}
+  .kpi .sub{font-size:13px;opacity:.9;margin-top:4px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:14px;color:var(--muted);margin-top:12px}
+  .meta b{color:var(--navy)}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+
+  .crow{padding:12px 0;border-top:1px solid var(--border)}
+  .crow:first-of-type{border-top:0}
+  .crow .top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+  .crow .t{font-weight:600;font-size:14px}
+  .crow.key .t::after{content:" ★";color:var(--gold)}
+  .hbar{display:grid;grid-template-columns:62px 1fr 40px;align-items:center;gap:8px;font-size:13px;margin:4px 0}
+  .hbar .track{height:10px;background:#EEF1F5;border-radius:6px;overflow:hidden}
+  .hbar .fill{height:100%;border-radius:6px}
+  .hbar .v{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+  .chip{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .chip.dan{background:var(--dan-soft);color:var(--dan)}
+  .chip.lila{background:var(--lila-soft);color:var(--lila)}
+  .chip.tie{background:#EEF1F5;color:var(--muted)}
+  .chip.warn{background:#FFF4E5;color:#8A4B00}
+
+  .split{display:flex;height:30px;border-radius:8px;overflow:hidden;background:#EEF1F5;font-size:13px;font-weight:700;color:#fff}
+  .split div{display:flex;align-items:center;justify-content:center;min-width:0;white-space:nowrap}
+  .split .d{background:var(--dan)} .split .l{background:var(--lila)}
+  .qrow{padding:12px 0;border-top:1px solid var(--border)}
+  .qrow:first-of-type{border-top:0}
+  .qrow p{margin:0 0 8px;font-size:14px;font-weight:600}
+  .qrow .cnt{display:flex;justify-content:space-between;font-size:13px;margin-top:6px}
+  .qrow .cnt .d{color:var(--dan);font-weight:700} .qrow .cnt .l{color:var(--lila);font-weight:700}
+
+  details.ev{border:1px solid var(--border);border-radius:12px;margin:10px 0;background:#fff;overflow:hidden}
+  details.ev summary{list-style:none;cursor:pointer;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  details.ev summary::-webkit-details-marker{display:none}
+  details.ev summary .nm{font-weight:700;color:var(--navy)}
+  details.ev summary .sm{font-size:13px;color:var(--muted)}
+  details.ev[open] summary{border-bottom:1px solid var(--border);background:#FAFBFC}
+  .ev-body{padding:14px}
+  table.sc{width:100%;border-collapse:collapse;font-size:14px}
+  table.sc th,table.sc td{padding:8px 6px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+  table.sc th{font-size:12px;color:var(--muted);font-weight:600}
+  table.sc td.n{text-align:center;font-weight:700;width:44px}
+  table.sc td.n.dan{color:var(--dan)} table.sc td.n.lila{color:var(--lila)}
+  table.sc .obs{display:block;font-size:13px;color:var(--muted);font-style:italic;margin-top:3px}
+  .kv{font-size:14px;margin:6px 0}
+  .kv b{color:var(--navy)}
+  ol.reason{margin:6px 0 0;padding-left:20px;font-size:14px}
+
+  @media (min-width:640px){
+    .cand-row{grid-template-columns:90px 1fr}
+    .legend{margin-left:100px}
+    .card{padding:22px}
+  }
+</style>
+</head>
+<body>
+
+<header class="brand">
+  <div class="wrap">
+    <div class="logo" aria-hidden="true">✡</div>
+    <div>
+      <h1>Colegio Hebreo Maguen David</h1>
+      <p>Search Committee · Candidate Evaluation</p>
+    </div>
+  </div>
+</header>
+<div id="demoBanner" class="demo-banner" hidden>
+  Demo mode — responses are saved only in this browser. Connect Supabase to go live (see README).
+</div>
+
+<main class="wrap" id="app" aria-live="polite"></main>
+
+<footer>
+  Confidential · For committee use only<br />
+  <a href="#admin" id="adminLink">Committee admin</a>
+</footer>
+
+<script>
+/* =====================================================================
+   CONFIGURATION — the only part you need to edit
+   ===================================================================== */
+const CONFIG = {
+  // From Supabase > Project Settings > API. Leave as-is to run in demo mode.
+  SUPABASE_URL: "YOUR_SUPABASE_URL",           // e.g. https://abcd1234.supabase.co
+  SUPABASE_ANON_KEY: "YOUR_SUPABASE_ANON_KEY", // the "anon" / "public" key
+
+  // Used ONLY in demo mode. In live mode the password is checked by Supabase
+  // (see supabase-setup.sql) and never appears in this page.
+  DEMO_ADMIN_PASSWORD: "MaguenDavid-2026",
+};
+
+const CANDIDATES = [
+  { key: "daniela", name: "Daniela", cls: "dan" },
+  { key: "lila",    name: "Lila",    cls: "lila" },
+];
+
+// Edit titles/descriptions freely. Weights must add up to 100.
+const CRITERIA = [
+  { id: "c1",  title: "Strategic leadership & vision", weight: 15,
+    desc: "Sets a clear long-term direction for CHMD and turns it into priorities, plans and measurable goals." },
+  { id: "c2",  title: "Capacity for transformation", weight: 15,
+    desc: "Proven ability to lead deep change in structures, processes and culture while bringing people along." },
+  { id: "c3",  title: "Educational & academic leadership", weight: 12,
+    desc: "Pedagogical depth; raises academic standards, teaching quality and student learning outcomes." },
+  { id: "c4",  title: "Jewish identity & cultural alignment", weight: 18, key: true,
+    desc: "Personal connection to Jewish values, tradition and community; will strengthen CHMD's Jewish identity and mission." },
+  { id: "c5",  title: "Community & stakeholder leadership", weight: 10,
+    desc: "Engages parents, alumni, donors and the wider Jewish community; builds trust and alliances." },
+  { id: "c6",  title: "People leadership & culture", weight: 8,
+    desc: "Attracts, develops and retains talent; builds a culture of accountability, collaboration and wellbeing." },
+  { id: "c7",  title: "Leadership of complex organization", weight: 8,
+    desc: "Experience running an institution of CHMD's size, with multiple sections, levels and stakeholders." },
+  { id: "c8",  title: "Personal qualities & presence", weight: 7,
+    desc: "Integrity, emotional intelligence, communication, credibility and presence." },
+  { id: "c9",  title: "Governance & Board relationship", weight: 5,
+    desc: "Understands governance roles; works transparently and constructively with the Board." },
+  { id: "c10", title: "Financial & operational leadership", weight: 2,
+    desc: "Manages budget, resources and operations with discipline and sound judgment." },
+];
+
+const QUESTIONS = [
+  { id: "q1", text: "Who is best equipped to lead CHMD's strategic transformation over 5–7 years?" },
+  { id: "q2", text: "Who is most likely to strengthen the school's academic performance?" },
+  { id: "q3", text: "Who is most likely to build trust with the Board, staff, parents and Jewish community?" },
+  { id: "q4", text: "Who has the strongest evidence of being able to lead CHMD's scale and complexity?" },
+  { id: "q5", text: "If we appointed this person tomorrow, who would you have the most confidence in succeeding?" },
+];
+
+/* =====================================================================
+   Storage layer (Supabase REST, or localStorage in demo mode)
+   ===================================================================== */
+const DEMO = !/^https:\/\//.test(CONFIG.SUPABASE_URL) || CONFIG.SUPABASE_ANON_KEY.startsWith("YOUR_");
+const LS_SUBMITTED = "chmd_eval_submitted_v1";
+const LS_DRAFT = "chmd_eval_draft_v1";
+const LS_DEMO_DB = "chmd_eval_demo_db_v1";
+
+const ls = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k){ try { localStorage.removeItem(k); } catch {} },
+};
+
+function sbHeaders(extra){
+  return Object.assign({
+    "apikey": CONFIG.SUPABASE_ANON_KEY,
+    "Authorization": "Bearer " + CONFIG.SUPABASE_ANON_KEY,
+    "Content-Type": "application/json",
+  }, extra || {});
+}
+const sbBase = () => CONFIG.SUPABASE_URL.replace(/\/+$/, "");
+
+const api = {
+  async submit(row){
+    if (DEMO){
+      const db = ls.get(LS_DEMO_DB) || [];
+      const k = row.evaluator_name.trim().toLowerCase();
+      if (db.some(r => r.evaluator_name.trim().toLowerCase() === k)) throw new Error("DUPLICATE");
+      db.push(Object.assign({ id: String(Date.now()) + Math.random().toString(16).slice(2), created_at: new Date().toISOString() }, row));
+      ls.set(LS_DEMO_DB, db);
+      return;
+    }
+    const res = await fetch(sbBase() + "/rest/v1/evaluations", {
+      method: "POST", headers: sbHeaders({ "Prefer": "return=minimal" }), body: JSON.stringify(row),
+    });
+    if (res.status === 409) throw new Error("DUPLICATE");
+    if (!res.ok) throw new Error("Server error (" + res.status + "): " + (await res.text()).slice(0, 200));
+  },
+  async results(password){
+    if (DEMO){
+      if (password !== CONFIG.DEMO_ADMIN_PASSWORD) throw new Error("BAD_PASSWORD");
+      return ls.get(LS_DEMO_DB) || [];
+    }
+    const res = await fetch(sbBase() + "/rest/v1/rpc/get_results", {
+      method: "POST", headers: sbHeaders(), body: JSON.stringify({ p_password: password }),
+    });
+    if (!res.ok){
+      const t = await res.text();
+      if (/invalid admin password/i.test(t)) throw new Error("BAD_PASSWORD");
+      throw new Error("Server error (" + res.status + "): " + t.slice(0, 200));
+    }
+    return res.json();
+  },
+  async remove(password, id){
+    if (DEMO){
+      ls.set(LS_DEMO_DB, (ls.get(LS_DEMO_DB) || []).filter(r => r.id !== id));
+      return;
+    }
+    const res = await fetch(sbBase() + "/rest/v1/rpc/delete_evaluation", {
+      method: "POST", headers: sbHeaders(), body: JSON.stringify({ p_password: password, p_id: id }),
+    });
+    if (!res.ok) throw new Error("Could not delete (" + res.status + ")");
+  },
+};
+
+/* =====================================================================
+   Helpers
+   ===================================================================== */
+const $app = document.getElementById("app");
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const fmt = (n, d = 2) => (n == null || isNaN(n)) ? "–" : n.toFixed(d);
+const candByName = n => CANDIDATES.find(c => c.name === n);
+function weighted(scores, candKey){
+  let t = 0;
+  for (const c of CRITERIA){ const v = scores && scores[c.id] && scores[c.id][candKey]; if (v) t += v * c.weight / 100; }
+  return t;
+}
+
+/* =====================================================================
+   Evaluator flow
+   ===================================================================== */
+function blankDraft(){
+  const scores = {};
+  CRITERIA.forEach(c => scores[c.id] = { daniela: null, lila: null, note: "" });
+  const comparisons = {};
+  QUESTIONS.forEach(q => comparisons[q.id] = null);
+  return { step: 0, name: "", scores, comparisons, final_choice: null, final_reasoning: ["", "", ""] };
+}
+let draft = Object.assign(blankDraft(), ls.get(LS_DRAFT) || {});
+const saveDraft = () => ls.set(LS_DRAFT, draft);
+
+const STEPS = ["Welcome", "Part 1 · Criteria", "Part 2 · Comparison", "Part 3 · Final preference"];
+
+function progressHTML(){
+  let done = 0, total = 0, label = "";
+  if (draft.step === 1){
+    total = CRITERIA.length * 2;
+    CRITERIA.forEach(c => { if (draft.scores[c.id].daniela) done++; if (draft.scores[c.id].lila) done++; });
+    label = done + " / " + total + " scores";
+  } else if (draft.step === 2){
+    total = QUESTIONS.length; done = QUESTIONS.filter(q => draft.comparisons[q.id]).length;
+    label = done + " / " + total + " answered";
+  } else if (draft.step === 3){
+    total = 2; done = (draft.final_choice ? 1 : 0) + (draft.final_reasoning.some(x => x.trim()) ? 1 : 0);
+    label = draft.final_choice ? "Choice made" : "Choose one";
+  }
+  const pct = ((draft.step - 1) / 3 + (total ? done / total / 3 : 0)) * 100;
+  return `<div class="progress" id="progress">
+    <div class="row"><span><b>${esc(STEPS[draft.step])}</b> · Step ${draft.step} of 3</span><span>${label}</span></div>
+    <div class="bar"><i style="width:${Math.max(3, pct)}%"></i></div>
+  </div>`;
+}
+function refreshProgress(){
+  const el = document.getElementById("progress");
+  if (el) el.outerHTML = progressHTML();
+}
+
+function renderEvaluator(){
+  const submitted = ls.get(LS_SUBMITTED);
+  if (submitted) return renderThanks(submitted.name, true);
+  if (draft.step === 0) return renderWelcome();
+  if (draft.step === 1) return renderPart1();
+  if (draft.step === 2) return renderPart2();
+  if (draft.step === 3) return renderPart3();
+}
+
+function renderWelcome(){
+  $app.innerHTML = `
+    <div class="card" style="margin-top:20px">
+      <h2>Candidate evaluation</h2>
+      <p class="lead">Please score <b style="color:var(--dan)">Daniela</b> and <b style="color:var(--lila)">Lila</b> independently.
+      Your answers are confidential: other committee members cannot see them.</p>
+      <p class="lead" style="margin-top:10px">It takes about 10–15 minutes and has three parts:</p>
+      <ol class="muted" style="margin:6px 0 0;padding-left:20px;font-size:15px">
+        <li>Score both candidates on 10 weighted criteria (1–5)</li>
+        <li>Five head-to-head questions</li>
+        <li>Your final preference and reasoning</li>
+      </ol>
+      <label class="fld" for="name">Your full name</label>
+      <input type="text" id="name" autocomplete="name" maxlength="80" placeholder="e.g. Sarah Cohen" value="${esc(draft.name)}" />
+      <div class="err" id="err"></div>
+      <div class="nav"><button class="btn gold" id="start">Start evaluation →</button></div>
+      <p class="muted" style="font-size:13px;margin:12px 0 0">You can submit only once. Your progress is saved on this device if you close the page.</p>
+    </div>`;
+  const input = document.getElementById("name");
+  input.addEventListener("input", () => { draft.name = input.value; saveDraft(); });
+  document.getElementById("start").onclick = () => {
+    if (input.value.trim().length < 2){ document.getElementById("err").textContent = "Please enter your name."; input.focus(); return; }
+    draft.name = input.value.trim(); goStep(1);
+  };
+  input.addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("start").click(); });
+}
+
+function scaleHTML(cid, cand){
+  const v = draft.scores[cid][cand.key];
+  let b = "";
+  for (let i = 1; i <= 5; i++){
+    b += `<button type="button" class="${v === i ? "on" : ""}" data-c="${cid}" data-k="${cand.key}" data-v="${i}" aria-label="${cand.name}: ${i}" aria-pressed="${v === i}">${i}</button>`;
+  }
+  return `<div class="cand-row"><span class="cand-name ${cand.cls}">${cand.name}</span><div class="scale ${cand.cls}">${b}</div></div>`;
+}
+
+function renderPart1(){
+  const cards = CRITERIA.map((c, i) => `
+    <div class="card crit ${c.key ? "key" : ""}" id="card-${c.id}">
+      <div class="head">
+        <h3><span class="num">${i + 1}.</span>${esc(c.title)}</h3>
+        <span class="weight">${c.weight}%</span>
+      </div>
+      ${c.key ? `<span class="flag">★ Highest weight criterion</span>` : ""}
+      <p class="desc">${esc(c.desc)}</p>
+      ${CANDIDATES.map(cd => scaleHTML(c.id, cd)).join("")}
+      <div class="legend"><span>1 · Weak</span><span>3 · Solid</span><span>5 · Outstanding</span></div>
+      <div class="note"><textarea data-note="${c.id}" maxlength="500" placeholder="Observation (optional)">${esc(draft.scores[c.id].note)}</textarea></div>
+    </div>`).join("");
+
+  $app.innerHTML = progressHTML() + `
+    <div class="section-title">Part 1 of 3</div>
+    <p class="lead">Score each candidate from 1 (weak) to 5 (outstanding) on every criterion. Weights are shown for reference.</p>
+    ${cards}
+    <div class="err" id="err"></div>
+    <div class="nav"><button class="btn ghost" id="back">← Back</button><button class="btn" id="next">Continue →</button></div>`;
+
+  $app.querySelectorAll(".scale button").forEach(btn => btn.onclick = () => {
+    const { c, k, v } = btn.dataset;
+    draft.scores[c][k] = +v; saveDraft();
+    btn.parentElement.querySelectorAll("button").forEach(b => { b.classList.toggle("on", b === btn); b.setAttribute("aria-pressed", b === btn); });
+    const card = document.getElementById("card-" + c);
+    if (draft.scores[c].daniela && draft.scores[c].lila) card.classList.remove("missing");
+    refreshProgress();
+  });
+  $app.querySelectorAll("textarea[data-note]").forEach(t => t.oninput = () => { draft.scores[t.dataset.note].note = t.value; saveDraft(); });
+  document.getElementById("back").onclick = () => goStep(0);
+  document.getElementById("next").onclick = () => {
+    const missing = CRITERIA.filter(c => !draft.scores[c.id].daniela || !draft.scores[c.id].lila);
+    CRITERIA.forEach(c => document.getElementById("card-" + c.id).classList.toggle("missing", missing.includes(c)));
+    if (missing.length){
+      document.getElementById("err").textContent = `Please score both candidates on all criteria (${missing.length} incomplete).`;
+      document.getElementById("card-" + missing[0].id).scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    goStep(2);
+  };
+}
+
+function choiceHTML(attr, id, value, big){
+  return `<div class="choice ${big ? "big" : ""}">${CANDIDATES.map(c =>
+    `<button type="button" class="${c.cls} ${value === c.name ? "on" : ""}" ${attr}="${id}" data-v="${c.name}" aria-pressed="${value === c.name}">${c.name}</button>`).join("")}</div>`;
+}
+
+function renderPart2(){
+  $app.innerHTML = progressHTML() + `
+    <div class="section-title">Part 2 of 3</div>
+    <p class="lead">For each question, choose one candidate.</p>
+    ${QUESTIONS.map((q, i) => `
+      <div class="card crit" id="card-${q.id}">
+        <p class="q">${i + 1}. ${esc(q.text)}</p>
+        ${choiceHTML("data-q", q.id, draft.comparisons[q.id])}
+      </div>`).join("")}
+    <div class="err" id="err"></div>
+    <div class="nav"><button class="btn ghost" id="back">← Back</button><button class="btn" id="next">Continue →</button></div>`;
+
+  $app.querySelectorAll("[data-q]").forEach(btn => btn.onclick = () => {
+    draft.comparisons[btn.dataset.q] = btn.dataset.v; saveDraft();
+    btn.parentElement.querySelectorAll("button").forEach(b => { b.classList.toggle("on", b === btn); b.setAttribute("aria-pressed", b === btn); });
+    document.getElementById("card-" + btn.dataset.q).classList.remove("missing");
+    refreshProgress();
+  });
+  document.getElementById("back").onclick = () => goStep(1);
+  document.getElementById("next").onclick = () => {
+    const missing = QUESTIONS.filter(q => !draft.comparisons[q.id]);
+    QUESTIONS.forEach(q => document.getElementById("card-" + q.id).classList.toggle("missing", missing.includes(q)));
+    if (missing.length){
+      document.getElementById("err").textContent = "Please answer all five questions.";
+      document.getElementById("card-" + missing[0].id).scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    goStep(3);
+  };
+}
+
+function renderPart3(){
+  $app.innerHTML = progressHTML() + `
+    <div class="section-title">Part 3 of 3</div>
+    <div class="card" id="card-final">
+      <h3>Final preference</h3>
+      <p class="desc">All things considered, which candidate do you recommend?</p>
+      ${choiceHTML("data-final", "final", draft.final_choice, true)}
+      <label class="fld">Your reasoning (up to 3 short lines)</label>
+      <div class="lines">
+        ${[0,1,2].map(i => `<input type="text" data-line="${i}" maxlength="240" placeholder="${i + 1}." value="${esc(draft.final_reasoning[i])}" />`).join("")}
+      </div>
+    </div>
+    <div class="err" id="err"></div>
+    <div class="nav"><button class="btn ghost" id="back">← Back</button><button class="btn gold" id="submit">Submit evaluation</button></div>
+    <p class="muted center" style="font-size:13px">Submitting as <b>${esc(draft.name)}</b>. You will not be able to edit afterwards.</p>`;
+
+  $app.querySelectorAll("[data-final]").forEach(btn => btn.onclick = () => {
+    draft.final_choice = btn.dataset.v; saveDraft();
+    btn.parentElement.querySelectorAll("button").forEach(b => { b.classList.toggle("on", b === btn); b.setAttribute("aria-pressed", b === btn); });
+    document.getElementById("card-final").classList.remove("missing");
+    refreshProgress();
+  });
+  $app.querySelectorAll("[data-line]").forEach(inp => inp.oninput = () => { draft.final_reasoning[+inp.dataset.line] = inp.value; saveDraft(); refreshProgress(); });
+  document.getElementById("back").onclick = () => goStep(2);
+  document.getElementById("submit").onclick = submit;
+}
+
+async function submit(){
+  const err = document.getElementById("err");
+  const btn = document.getElementById("submit");
+  if (!draft.final_choice){ err.textContent = "Please choose your final preference."; document.getElementById("card-final").classList.add("missing"); return; }
+  if (!draft.final_reasoning.some(x => x.trim())){ err.textContent = "Please write at least one line explaining your choice."; return; }
+  if (!confirm("Submit your evaluation now? You won't be able to change it.")) return;
+
+  btn.disabled = true; btn.textContent = "Submitting…"; err.textContent = "";
+  const row = {
+    evaluator_name: draft.name.trim(),
+    scores: draft.scores,
+    comparisons: draft.comparisons,
+    final_choice: draft.final_choice,
+    final_reasoning: draft.final_reasoning.map(s => s.trim()).filter(Boolean),
+  };
+  try {
+    await api.submit(row);
+    ls.set(LS_SUBMITTED, { name: row.evaluator_name, at: new Date().toISOString() });
+    ls.del(LS_DRAFT);
+    renderThanks(row.evaluator_name, false);
+  } catch (e){
+    btn.disabled = false; btn.textContent = "Submit evaluation";
+    err.textContent = e.message === "DUPLICATE"
+      ? "An evaluation under this name has already been submitted. If this is a mistake, contact the committee chair."
+      : "Could not submit. Check your connection and try again. (" + e.message + ")";
+  }
+}
+
+function renderThanks(name, already){
+  $app.innerHTML = `
+    <div class="card thanks center" style="margin-top:24px">
+      <div class="check">✓</div>
+      <h2>Thank you${name ? ", " + esc(name.split(" ")[0]) : ""}</h2>
+      <p class="lead">${already ? "Your evaluation from this device has already been submitted." : "Your evaluation has been submitted successfully."}</p>
+      <p class="lead">Your responses are confidential and will be reviewed together with the rest of the committee.</p>
+    </div>`;
+  window.scrollTo(0, 0);
+}
+
+function goStep(n){ draft.step = n; saveDraft(); renderEvaluator(); window.scrollTo(0, 0); }
+
+/* =====================================================================
+   Admin
+   ===================================================================== */
+let adminPassword = null;
+let adminData = [];
+
+function renderAdminLogin(msg){
+  $app.innerHTML = `
+    <div class="card" style="margin-top:20px">
+      <h2>Committee admin</h2>
+      <p class="lead">Enter the admin password to view results.</p>
+      <label class="fld" for="pw">Password</label>
+      <input type="password" id="pw" autocomplete="current-password" />
+      <div class="err" id="err">${esc(msg || "")}</div>
+      <div class="nav"><button class="btn ghost" id="cancel">Cancel</button><button class="btn" id="go">View results</button></div>
+    </div>`;
+  const pw = document.getElementById("pw");
+  pw.focus();
+  pw.addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("go").click(); });
+  document.getElementById("cancel").onclick = () => { history.replaceState(null, "", location.pathname + location.search); renderEvaluator(); };
+  document.getElementById("go").onclick = async () => {
+    const b = document.getElementById("go"); b.disabled = true; b.textContent = "Checking…";
+    try {
+      adminData = await api.results(pw.value);
+      adminPassword = pw.value;
+      renderDashboard();
+    } catch (e){
+      renderAdminLogin(e.message === "BAD_PASSWORD" ? "Incorrect password." : e.message);
+    }
+  };
+}
+
+function aggregate(rows){
+  const n = rows.length;
+  const crit = CRITERIA.map(c => {
+    const avg = {};
+    CANDIDATES.forEach(cd => {
+      const vals = rows.map(r => r.scores && r.scores[c.id] && r.scores[c.id][cd.key]).filter(v => typeof v === "number");
+      avg[cd.key] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+    });
+    return { c, avg, diff: (avg.daniela || 0) - (avg.lila || 0) };
+  });
+  const total = {};
+  CANDIDATES.forEach(cd => total[cd.key] = n ? crit.reduce((s, x) => s + (x.avg[cd.key] || 0) * x.c.weight / 100, 0) : null);
+  const q = QUESTIONS.map(qq => {
+    const t = { Daniela: 0, Lila: 0 };
+    rows.forEach(r => { const v = r.comparisons && r.comparisons[qq.id]; if (t[v] != null) t[v]++; });
+    return { q: qq, t };
+  });
+  const fin = { Daniela: 0, Lila: 0 };
+  rows.forEach(r => { if (fin[r.final_choice] != null) fin[r.final_choice]++; });
+  return { n, crit, total, q, fin };
+}
+
+function advChip(diff){
+  if (Math.abs(diff) < 0.05) return `<span class="chip tie">Tie</span>`;
+  const c = diff > 0 ? CANDIDATES[0] : CANDIDATES[1];
+  return `<span class="chip ${c.cls}">${c.name} +${fmt(Math.abs(diff))}</span>`;
+}
+
+function splitBar(d, l){
+  const t = d + l;
+  if (!t) return `<div class="split"><div style="flex:1;color:var(--muted)">No answers</div></div>`;
+  return `<div class="split">
+    ${d ? `<div class="d" style="flex:${d}">${Math.round(d / t * 100)}%</div>` : ""}
+    ${l ? `<div class="l" style="flex:${l}">${Math.round(l / t * 100)}%</div>` : ""}
+  </div>`;
+}
+
+function renderDashboard(){
+  const A = aggregate(adminData);
+  const lead = A.n ? (Math.abs(A.total.daniela - A.total.lila) < 0.005 ? null : (A.total.daniela > A.total.lila ? "Daniela" : "Lila")) : null;
+
+  const evCards = adminData.map(r => {
+    const wd = weighted(r.scores, "daniela"), wl = weighted(r.scores, "lila");
+    const scoreLeader = Math.abs(wd - wl) < 0.005 ? null : (wd > wl ? "Daniela" : "Lila");
+    const mismatch = scoreLeader && r.final_choice && scoreLeader !== r.final_choice;
+    const fc = candByName(r.final_choice);
+    return `
+    <details class="ev">
+      <summary>
+        <div><div class="nm">${esc(r.evaluator_name)}</div>
+          <div class="sm">Weighted: <b style="color:var(--dan)">${fmt(wd)}</b> vs <b style="color:var(--lila)">${fmt(wl)}</b> · ${new Date(r.created_at).toLocaleString()}</div></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          ${fc ? `<span class="chip ${fc.cls}">${fc.name}</span>` : ""}
+          ${mismatch ? `<span class="chip warn" title="Final choice differs from higher weighted score">≠ scores</span>` : ""}
+        </div>
+      </summary>
+      <div class="ev-body">
+        <table class="sc">
+          <thead><tr><th>Criterion</th><th style="text-align:center">Dan.</th><th style="text-align:center">Lila</th></tr></thead>
+          <tbody>
+          ${CRITERIA.map((c, i) => { const s = (r.scores && r.scores[c.id]) || {}; return `
+            <tr><td>${i + 1}. ${esc(c.title)} <span class="muted">(${c.weight}%)</span>${s.note ? `<span class="obs">“${esc(s.note)}”</span>` : ""}</td>
+            <td class="n dan">${esc(s.daniela ?? "–")}</td><td class="n lila">${esc(s.lila ?? "–")}</td></tr>`; }).join("")}
+          </tbody>
+        </table>
+        <div class="section-title" style="margin-top:16px">Comparison questions</div>
+        ${QUESTIONS.map((q, i) => { const v = r.comparisons && r.comparisons[q.id]; const c = candByName(v);
+          return `<div class="kv">${i + 1}. ${esc(q.text)} → ${c ? `<b style="color:var(--${c.cls})">${c.name}</b>` : "–"}</div>`; }).join("")}
+        <div class="section-title" style="margin-top:16px">Final preference</div>
+        <div class="kv">${fc ? `<b style="color:var(--${fc.cls})">${fc.name}</b>` : "–"}</div>
+        ${(r.final_reasoning || []).length ? `<ol class="reason">${r.final_reasoning.map(x => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}
+        <div style="margin-top:16px;text-align:right"><button class="btn small danger" data-del="${esc(r.id)}" data-nm="${esc(r.evaluator_name)}">Delete this response</button></div>
+      </div>
+    </details>`; }).join("");
+
+  $app.innerHTML = `
+    <div class="section-title">Results dashboard</div>
+    <div class="toolbar">
+      <button class="btn small" id="refresh">↻ Refresh</button>
+      <button class="btn small ghost" id="csv" ${A.n ? "" : "disabled"}>Export CSV</button>
+      <button class="btn small ghost" id="logout">Log out</button>
+    </div>
+
+    <div class="card">
+      <h3>Total weighted score (out of 5)</h3>
+      <div class="kpis" style="margin-top:12px">
+        ${CANDIDATES.map(c => `<div class="kpi ${c.cls}"><div class="lbl">${c.name}</div>
+          <div class="val">${fmt(A.total[c.key])}<small> / 5</small></div>
+          <div class="sub">${A.fin[c.name]} final vote${A.fin[c.name] === 1 ? "" : "s"}</div></div>`).join("")}
+      </div>
+      <div class="meta">
+        <span>Evaluators: <b>${A.n}</b></span>
+        <span>Leader on score: <b>${lead ? `<span style="color:var(--${candByName(lead).cls})">${lead}</span> (+${fmt(Math.abs(A.total.daniela - A.total.lila))})` : (A.n ? "Tie" : "–")}</b></span>
+      </div>
+    </div>
+
+    ${A.n ? `
+    <div class="card">
+      <h3>Final preference</h3>
+      <div style="margin-top:12px">${splitBar(A.fin.Daniela, A.fin.Lila)}</div>
+      <div class="qrow" style="border:0;padding-top:0"><div class="cnt"><span class="d">Daniela · ${A.fin.Daniela}</span><span class="l">Lila · ${A.fin.Lila}</span></div></div>
+    </div>
+
+    <div class="card">
+      <h3>Breakdown by criterion</h3>
+      <p class="desc" style="margin-bottom:4px">Average score per candidate (1–5). ★ = highest weight.</p>
+      ${A.crit.map((x, i) => `
+        <div class="crow ${x.c.key ? "key" : ""}">
+          <div class="top"><span class="t">${i + 1}. ${esc(x.c.title)} <span class="muted">· ${x.c.weight}%</span></span>${advChip(x.diff)}</div>
+          ${CANDIDATES.map(cd => `<div class="hbar"><span class="cand-name ${cd.cls}">${cd.name}</span>
+            <div class="track"><div class="fill" style="width:${(x.avg[cd.key] || 0) / 5 * 100}%;background:var(--${cd.cls})"></div></div>
+            <span class="v">${fmt(x.avg[cd.key])}</span></div>`).join("")}
+        </div>`).join("")}
+    </div>
+
+    <div class="card">
+      <h3>Comparison questions</h3>
+      ${A.q.map((x, i) => `
+        <div class="qrow"><p>${i + 1}. ${esc(x.q.text)}</p>
+          ${splitBar(x.t.Daniela, x.t.Lila)}
+          <div class="cnt"><span class="d">Daniela · ${x.t.Daniela}</span><span class="l">Lila · ${x.t.Lila}</span></div>
+        </div>`).join("")}
+    </div>
+
+    <div class="card">
+      <h3>Individual responses</h3>
+      <p class="desc">Tap a name to expand. “≠ scores” marks evaluators whose final choice differs from their own higher weighted score.</p>
+      ${evCards}
+    </div>` : `<div class="card center"><p class="lead">No evaluations submitted yet.</p></div>`}
+  `;
+
+  document.getElementById("refresh").onclick = async () => {
+    try { adminData = await api.results(adminPassword); renderDashboard(); } catch (e){ alert(e.message); }
+  };
+  document.getElementById("logout").onclick = () => {
+    adminPassword = null; adminData = [];
+    history.replaceState(null, "", location.pathname + location.search);
+    renderEvaluator();
+  };
+  document.getElementById("csv").onclick = exportCSV;
+  $app.querySelectorAll("[data-del]").forEach(b => b.onclick = async () => {
+    if (!confirm(`Delete the evaluation from "${b.dataset.nm}"? This cannot be undone.`)) return;
+    try { await api.remove(adminPassword, b.dataset.del); adminData = await api.results(adminPassword); renderDashboard(); }
+    catch (e){ alert(e.message); }
+  });
+}
+
+function exportCSV(){
+  const head = ["Evaluator", "Submitted"];
+  CRITERIA.forEach((c, i) => head.push(`C${i + 1} Daniela`, `C${i + 1} Lila`, `C${i + 1} Note`));
+  head.push("Weighted Daniela", "Weighted Lila");
+  QUESTIONS.forEach((q, i) => head.push(`Q${i + 1}`));
+  head.push("Final choice", "Reason 1", "Reason 2", "Reason 3");
+  const rows = adminData.map(r => {
+    const out = [r.evaluator_name, r.created_at];
+    CRITERIA.forEach(c => { const s = (r.scores && r.scores[c.id]) || {}; out.push(s.daniela ?? "", s.lila ?? "", s.note || ""); });
+    out.push(weighted(r.scores, "daniela").toFixed(2), weighted(r.scores, "lila").toFixed(2));
+    QUESTIONS.forEach(q => out.push((r.comparisons && r.comparisons[q.id]) || ""));
+    const fr = r.final_reasoning || [];
+    out.push(r.final_choice || "", fr[0] || "", fr[1] || "", fr[2] || "");
+    return out;
+  });
+  const csv = [head, ...rows].map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }));
+  a.download = "chmd-committee-results.csv";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* =====================================================================
+   Router
+   ===================================================================== */
+function route(){
+  if (location.hash === "#admin"){ adminPassword ? renderDashboard() : renderAdminLogin(); }
+  else renderEvaluator();
+}
+window.addEventListener("hashchange", route);
+if (DEMO) document.getElementById("demoBanner").hidden = false;
+route();
+</script>
+</body>
+</html>

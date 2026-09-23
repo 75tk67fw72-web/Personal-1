@@ -1519,6 +1519,9 @@ function renderMatrixView(records) {
   html += '<tr class="matrix-total-row"><th class="matrix-corner">Niños</th>';
   totals.forEach(t => { html += `<td class="matrix-total-cell">${t.type === "counts" ? t.ninos : "—"}</td>`; });
   html += '</tr>';
+  html += '<tr class="matrix-total-row"><th class="matrix-corner">Infantes</th>';
+  totals.forEach(t => { html += `<td class="matrix-total-cell">${t.type === "counts" ? t.infantes : "—"}</td>`; });
+  html += '</tr>';
   html += '<tr class="matrix-total-row matrix-total-general"><th class="matrix-corner">Total</th>';
   totals.forEach(t => {
     const total = t.type === "counts" ? (t.adultos + t.ninos + t.infantes) : t.families;

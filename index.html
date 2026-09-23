@@ -916,9 +916,26 @@ document.querySelectorAll(".toggle-group").forEach(group => {
   yesBtn.addEventListener("click", () => {
     yesBtn.classList.add("active", "yes");
     noBtn.classList.remove("active");
-    if (fieldsWrap) fieldsWrap.classList.add("show");
+    if (fieldsWrap) {
+      fieldsWrap.classList.add("show");
+      prefillCountsFromLastUsed(fieldsWrap);
+    }
   });
 });
+
+// Remembers the last adultos/niños/infantes entered, so the next
+// activity toggled to "Sí" starts pre-filled instead of at 0.
+let lastCounts = { adultos: 0, ninos: 0, infantes: 0 };
+
+function prefillCountsFromLastUsed(fieldsWrap) {
+  const steppers = fieldsWrap.querySelectorAll(".stepper");
+  const allUntouched = Array.from(steppers).every(el => (parseInt(el.querySelector(".step-value").dataset.value, 10) || 0) === 0);
+  if (!allUntouched) return;
+  steppers.forEach(stepperEl => {
+    const fkey = stepperEl.dataset.field;
+    if (lastCounts[fkey]) setStepperValue(stepperEl, lastCounts[fkey]);
+  });
+}
 
 // Stepper (+/-) behavior — delegated, since steppers are generated dynamically
 function setStepperValue(stepperEl, value) {
@@ -934,6 +951,8 @@ daysContainer.addEventListener("click", (evt) => {
   const valueEl = stepperEl.querySelector(".step-value");
   const current = parseInt(valueEl.dataset.value, 10) || 0;
   setStepperValue(stepperEl, btn.classList.contains("step-plus") ? current + 1 : current - 1);
+  const fkey = stepperEl.dataset.field;
+  if (fkey in lastCounts) lastCounts[fkey] = parseInt(valueEl.dataset.value, 10) || 0;
 });
 
 /* =====================================================================

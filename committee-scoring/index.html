@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="robots" content="noindex, nofollow" />
-<title>CHMD Committee Scoring</title>
+<title>CHMD · Valoración Final</title>
 <style>
   :root{
     --navy:#1B3858;
@@ -90,7 +90,7 @@
   .scale button{border:1px solid #cdd4de;background:#fff;border-radius:9px;height:44px;font-weight:700;cursor:pointer;font-size:16px}
   .scale.dan button.on{background:var(--dan);border-color:var(--dan);color:#fff}
   .scale.lila button.on{background:var(--lila);border-color:var(--lila);color:#fff}
-  .legend{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:2px 0 0 82px}
+  .legend{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center;font-size:11px;line-height:1.2;color:var(--muted);margin:2px 0 0 82px}
   .note{margin-top:10px}
   .note textarea{min-height:44px;font-size:15px;padding:10px 12px}
 
@@ -180,19 +180,19 @@
     <div class="logo" aria-hidden="true">✡</div>
     <div>
       <h1>Colegio Hebreo Maguen David</h1>
-      <p>Search Committee · Candidate Evaluation</p>
+      <p>Comité de Selección · Dirección General</p>
     </div>
   </div>
 </header>
 <div id="demoBanner" class="demo-banner" hidden>
-  Demo mode — responses are saved only in this browser. Connect Supabase to go live (see README).
+  Modo demo — las respuestas se guardan solo en este navegador. Conecta Supabase para operar en vivo (ver README).
 </div>
 
 <main class="wrap" id="app" aria-live="polite"></main>
 
 <footer>
-  Confidential · For committee use only<br />
-  <a href="#admin" id="adminLink">Committee admin</a>
+  Documento confidencial — Uso exclusivo del Comité de Selección<br />
+  <a href="#admin" id="adminLink">Administración</a>
 </footer>
 
 <script>
@@ -209,41 +209,45 @@ const CONFIG = {
   DEMO_ADMIN_PASSWORD: "MaguenDavid-2026",
 };
 
+const SCALE = ["Muy débil", "Débil", "Cumple", "Sólido", "Excepcional"];
+
 const CANDIDATES = [
   { key: "daniela", name: "Daniela", cls: "dan" },
   { key: "lila",    name: "Lila",    cls: "lila" },
 ];
 
-// Edit titles/descriptions freely. Weights must add up to 100.
+// Texto tomado del "Instrumento de Valoración Final" (septiembre 2026).
+// Los pesos deben sumar 100. `desc` puede tener uno o varios párrafos.
 const CRITERIA = [
-  { id: "c1",  title: "Strategic leadership & vision", weight: 15,
-    desc: "Sets a clear long-term direction for CHMD and turns it into priorities, plans and measurable goals." },
-  { id: "c2",  title: "Capacity for transformation", weight: 15,
-    desc: "Proven ability to lead deep change in structures, processes and culture while bringing people along." },
-  { id: "c3",  title: "Educational & academic leadership", weight: 12,
-    desc: "Pedagogical depth; raises academic standards, teaching quality and student learning outcomes." },
-  { id: "c4",  title: "Jewish identity & cultural alignment", weight: 18, key: true,
-    desc: "Personal connection to Jewish values, tradition and community; will strengthen CHMD's Jewish identity and mission." },
-  { id: "c5",  title: "Community & stakeholder leadership", weight: 10,
-    desc: "Engages parents, alumni, donors and the wider Jewish community; builds trust and alliances." },
-  { id: "c6",  title: "People leadership & culture", weight: 8,
-    desc: "Attracts, develops and retains talent; builds a culture of accountability, collaboration and wellbeing." },
-  { id: "c7",  title: "Leadership of complex organization", weight: 8,
-    desc: "Experience running an institution of CHMD's size, with multiple sections, levels and stakeholders." },
-  { id: "c8",  title: "Personal qualities & presence", weight: 7,
-    desc: "Integrity, emotional intelligence, communication, credibility and presence." },
-  { id: "c9",  title: "Governance & Board relationship", weight: 5,
-    desc: "Understands governance roles; works transparently and constructively with the Board." },
-  { id: "c10", title: "Financial & operational leadership", weight: 2,
-    desc: "Manages budget, resources and operations with discipline and sound judgment." },
+  { id: "c1",  title: "Liderazgo estratégico y visión", weight: 15,
+    desc: ["¿Puede articular una visión de largo plazo para el CHMD y convertirla en dirección concreta? ¿Su visión integra lo académico, lo judío y lo comunitario, o los trata como mundos separados?"] },
+  { id: "c2",  title: "Capacidad de transformación", weight: 15,
+    desc: ["¿Puede desafiar la práctica actual, superar la resistencia y liderar mejora significativa sin desestabilizar el colegio? ¿Entiende que transformar el CHMD es construir desde lo que ya es, no importar un modelo externo?"] },
+  { id: "c3",  title: "Liderazgo educativo y académico", weight: 12,
+    desc: ["¿Tiene trayectoria real de mejora en enseñanza, aprendizaje, evaluación y resultados? ¿Conoce el programa IB desde adentro? ¿Su criterio pedagógico es propio o depende de lo que le dicen los coordinadores?"] },
+  { id: "c4",  title: "Identidad judía y alineación cultural", weight: 18, key: true,
+    desc: ["No evalúa si la candidata es judía. Evalúa si puede defender la identidad judía como el eje no negociable del colegio cuando una familia la cuestiona, cuando un docente la resiste, o cuando el calendario académico la presiona.",
+           "¿Comprende que el judaísmo en el CHMD no es cultura a respetar, sino misión a sostener? ¿Tiene convicción genuina o deferencia protocolar?"] },
+  { id: "c5",  title: "Liderazgo comunitario y stakeholders", weight: 10,
+    desc: ["¿Puede construir confianza simultánea con el Patronato, los padres, el equipo docente y la comunidad judía? ¿Su liderazgo convoca o impone? ¿La seguirían quienes más necesita que la sigan?"] },
+  { id: "c6",  title: "Liderazgo de personas y cultura", weight: 8,
+    desc: ["¿Puede inspirar, desarrollar y responsabilizar a su equipo al mismo tiempo? ¿Genera una cultura de trabajo positiva y de alto desempeño? ¿Cómo maneja a quien resiste el cambio con muchos años en el colegio?"] },
+  { id: "c7",  title: "Liderazgo de organización compleja", weight: 8,
+    desc: ["¿Tiene evidencia de haber dirigido exitosamente una institución de escala y complejidad comparable al CHMD, con múltiples stakeholders y prioridades en tensión permanente?"] },
+  { id: "c8",  title: "Cualidades personales y presencia", weight: 7,
+    desc: ["¿Tiene juicio, inteligencia emocional, resiliencia e integridad? ¿Genera credibilidad y confianza de forma natural? ¿Es auténtica — lo mismo en la sala de reuniones que en el pasillo del colegio?"] },
+  { id: "c9",  title: "Gobernanza y relación con el Patronato", weight: 5,
+    desc: ["¿Puede trabajar efectivamente con el Patronato, comunicar temas difíciles con claridad y establecer accountability apropiado? ¿Entiende dónde termina su autoridad y dónde empieza la del Patronato — de forma instintiva, no solo de forma teórica?"] },
+  { id: "c10", title: "Liderazgo financiero y operativo", weight: 2,
+    desc: ["¿Tiene capacidad de gestión de presupuestos, recursos e instalaciones? ¿Entiende la relación entre sostenibilidad financiera y misión educativa? Este criterio tiene menor peso porque ambas candidatas tienen esta base cubierta."] },
 ];
 
 const QUESTIONS = [
-  { id: "q1", text: "Who is best equipped to lead CHMD's strategic transformation over 5–7 years?" },
-  { id: "q2", text: "Who is most likely to strengthen the school's academic performance?" },
-  { id: "q3", text: "Who is most likely to build trust with the Board, staff, parents and Jewish community?" },
-  { id: "q4", text: "Who has the strongest evidence of being able to lead CHMD's scale and complexity?" },
-  { id: "q5", text: "If we appointed this person tomorrow, who would you have the most confidence in succeeding?" },
+  { id: "q1", text: "¿Quién está más capacitada para liderar la transformación estratégica que el CHMD necesita en los próximos 5–7 años?" },
+  { id: "q2", text: "¿Quién tiene más posibilidades de fortalecer el desempeño académico del colegio?" },
+  { id: "q3", text: "¿Quién generará mayor confianza entre el Patronato, el equipo, los padres y la comunidad judía?" },
+  { id: "q4", text: "¿Quién tiene mayor evidencia de poder liderar con éxito la escala y complejidad particular del CHMD?" },
+  { id: "q5", text: "Si designáramos a esta persona mañana, ¿en quién tendrías más confianza de que tendrá éxito en el rol?" },
 ];
 
 /* =====================================================================
@@ -283,7 +287,7 @@ const api = {
       method: "POST", headers: sbHeaders({ "Prefer": "return=minimal" }), body: JSON.stringify(row),
     });
     if (res.status === 409) throw new Error("DUPLICATE");
-    if (!res.ok) throw new Error("Server error (" + res.status + "): " + (await res.text()).slice(0, 200));
+    if (!res.ok) throw new Error("Error del servidor (" + res.status + "): " + (await res.text()).slice(0, 200));
   },
   async results(password){
     if (DEMO){
@@ -296,7 +300,7 @@ const api = {
     if (!res.ok){
       const t = await res.text();
       if (/invalid admin password/i.test(t)) throw new Error("BAD_PASSWORD");
-      throw new Error("Server error (" + res.status + "): " + t.slice(0, 200));
+      throw new Error("Error del servidor (" + res.status + "): " + t.slice(0, 200));
     }
     return res.json();
   },
@@ -308,7 +312,7 @@ const api = {
     const res = await fetch(sbBase() + "/rest/v1/rpc/delete_evaluation", {
       method: "POST", headers: sbHeaders(), body: JSON.stringify({ p_password: password, p_id: id }),
     });
-    if (!res.ok) throw new Error("Could not delete (" + res.status + ")");
+    if (!res.ok) throw new Error("No se pudo eliminar (" + res.status + ")");
   },
 };
 
@@ -338,24 +342,24 @@ function blankDraft(){
 let draft = Object.assign(blankDraft(), ls.get(LS_DRAFT) || {});
 const saveDraft = () => ls.set(LS_DRAFT, draft);
 
-const STEPS = ["Welcome", "Part 1 · Criteria", "Part 2 · Comparison", "Part 3 · Final preference"];
+const STEPS = ["Inicio", "Parte 1 · Puntajes", "Parte 2 · Contraste", "Parte 3 · Preferencia final"];
 
 function progressHTML(){
   let done = 0, total = 0, label = "";
   if (draft.step === 1){
     total = CRITERIA.length * 2;
     CRITERIA.forEach(c => { if (draft.scores[c.id].daniela) done++; if (draft.scores[c.id].lila) done++; });
-    label = done + " / " + total + " scores";
+    label = done + " / " + total + " puntajes";
   } else if (draft.step === 2){
     total = QUESTIONS.length; done = QUESTIONS.filter(q => draft.comparisons[q.id]).length;
-    label = done + " / " + total + " answered";
+    label = done + " / " + total + " respondidas";
   } else if (draft.step === 3){
     total = 2; done = (draft.final_choice ? 1 : 0) + (draft.final_reasoning.some(x => x.trim()) ? 1 : 0);
-    label = draft.final_choice ? "Choice made" : "Choose one";
+    label = draft.final_choice ? "Elegida" : "Elige una";
   }
   const pct = ((draft.step - 1) / 3 + (total ? done / total / 3 : 0)) * 100;
   return `<div class="progress" id="progress">
-    <div class="row"><span><b>${esc(STEPS[draft.step])}</b> · Step ${draft.step} of 3</span><span>${label}</span></div>
+    <div class="row"><span><b>${esc(STEPS[draft.step])}</b> · Paso ${draft.step} de 3</span><span>${label}</span></div>
     <div class="bar"><i style="width:${Math.max(3, pct)}%"></i></div>
   </div>`;
 }
@@ -376,25 +380,25 @@ function renderEvaluator(){
 function renderWelcome(){
   $app.innerHTML = `
     <div class="card" style="margin-top:20px">
-      <h2>Candidate evaluation</h2>
-      <p class="lead">Please score <b style="color:var(--dan)">Daniela</b> and <b style="color:var(--lila)">Lila</b> independently.
-      Your answers are confidential: other committee members cannot see them.</p>
-      <p class="lead" style="margin-top:10px">It takes about 10–15 minutes and has three parts:</p>
-      <ol class="muted" style="margin:6px 0 0;padding-left:20px;font-size:15px">
-        <li>Score both candidates on 10 weighted criteria (1–5)</li>
-        <li>Five head-to-head questions</li>
-        <li>Your final preference and reasoning</li>
+      <h2>Instrumento de Valoración Final</h2>
+      <p class="lead" style="margin-bottom:4px"><b style="color:var(--dan)">Daniela</b> · <b style="color:var(--lila)">Lila</b></p>
+      <p class="lead">Hemos llegado al momento más importante del proceso. Después de revisar los casos, la entrevista virtual y la visita presencial, cada miembro del Comité tiene una impresión formada. Este instrumento está diseñado para que esa impresión se convierta en una valoración estructurada — no para reemplazar el criterio de cada quien, sino para darle forma comparable.</p>
+      <ol class="muted" style="margin:10px 0 0;padding-left:20px;font-size:15px">
+        <li>Puntajes por criterio: cada candidata del 1 al 5</li>
+        <li>Cinco preguntas directas de contraste</li>
+        <li>Tu preferencia final y razón principal</li>
       </ol>
-      <label class="fld" for="name">Your full name</label>
-      <input type="text" id="name" autocomplete="name" maxlength="80" placeholder="e.g. Sarah Cohen" value="${esc(draft.name)}" />
+      <p class="lead" style="margin-top:10px">Todo junto, no el puntaje solo, será el insumo de nuestra conversación de cierre. Llénalo de forma individual y sé honesto: tus respuestas son confidenciales y nadie más del Comité puede verlas.</p>
+      <label class="fld" for="name">Nombre del evaluador</label>
+      <input type="text" id="name" autocomplete="name" maxlength="80" placeholder="Nombre y apellido" value="${esc(draft.name)}" />
       <div class="err" id="err"></div>
-      <div class="nav"><button class="btn gold" id="start">Start evaluation →</button></div>
-      <p class="muted" style="font-size:13px;margin:12px 0 0">You can submit only once. Your progress is saved on this device if you close the page.</p>
+      <div class="nav"><button class="btn gold" id="start">Comenzar →</button></div>
+      <p class="muted" style="font-size:13px;margin:12px 0 0">Solo puedes enviar una vez. Si cierras la página, tu avance queda guardado en este dispositivo.</p>
     </div>`;
   const input = document.getElementById("name");
   input.addEventListener("input", () => { draft.name = input.value; saveDraft(); });
   document.getElementById("start").onclick = () => {
-    if (input.value.trim().length < 2){ document.getElementById("err").textContent = "Please enter your name."; input.focus(); return; }
+    if (input.value.trim().length < 2){ document.getElementById("err").textContent = "Escribe tu nombre."; input.focus(); return; }
     draft.name = input.value.trim(); goStep(1);
   };
   input.addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("start").click(); });
@@ -404,7 +408,7 @@ function scaleHTML(cid, cand){
   const v = draft.scores[cid][cand.key];
   let b = "";
   for (let i = 1; i <= 5; i++){
-    b += `<button type="button" class="${v === i ? "on" : ""}" data-c="${cid}" data-k="${cand.key}" data-v="${i}" aria-label="${cand.name}: ${i}" aria-pressed="${v === i}">${i}</button>`;
+    b += `<button type="button" class="${v === i ? "on" : ""}" data-c="${cid}" data-k="${cand.key}" data-v="${i}" aria-label="${cand.name}: ${i} (${SCALE[i - 1]})" aria-pressed="${v === i}">${i}</button>`;
   }
   return `<div class="cand-row"><span class="cand-name ${cand.cls}">${cand.name}</span><div class="scale ${cand.cls}">${b}</div></div>`;
 }
@@ -416,19 +420,20 @@ function renderPart1(){
         <h3><span class="num">${i + 1}.</span>${esc(c.title)}</h3>
         <span class="weight">${c.weight}%</span>
       </div>
-      ${c.key ? `<span class="flag">★ Highest weight criterion</span>` : ""}
-      <p class="desc">${esc(c.desc)}</p>
+      ${c.key ? `<span class="flag">★ Criterio de mayor peso</span>` : ""}
+      ${c.desc.map(d => `<p class="desc">${esc(d)}</p>`).join("")}
       ${CANDIDATES.map(cd => scaleHTML(c.id, cd)).join("")}
-      <div class="legend"><span>1 · Weak</span><span>3 · Solid</span><span>5 · Outstanding</span></div>
-      <div class="note"><textarea data-note="${c.id}" maxlength="500" placeholder="Observation (optional)">${esc(draft.scores[c.id].note)}</textarea></div>
+      <div class="legend">${SCALE.map(l => `<span>${l}</span>`).join("")}</div>
+      <div class="note"><textarea data-note="${c.id}" maxlength="500" placeholder="Evidencia observada (opcional)">${esc(draft.scores[c.id].note)}</textarea></div>
     </div>`).join("");
 
   $app.innerHTML = progressHTML() + `
-    <div class="section-title">Part 1 of 3</div>
-    <p class="lead">Score each candidate from 1 (weak) to 5 (outstanding) on every criterion. Weights are shown for reference.</p>
+    <div class="section-title">Parte 1 — Puntajes por criterio</div>
+    <p class="lead">Para cada criterio: lee la descripción, piensa en evidencia concreta que observaste, y marca el puntaje para cada candidata.</p>
+    <p class="lead" style="font-size:14px"><b>Escala:</b> 1 Muy débil · 2 Débil · 3 Cumple · 4 Sólido · 5 Excepcional</p>
     ${cards}
     <div class="err" id="err"></div>
-    <div class="nav"><button class="btn ghost" id="back">← Back</button><button class="btn" id="next">Continue →</button></div>`;
+    <div class="nav"><button class="btn ghost" id="back">← Atrás</button><button class="btn" id="next">Continuar →</button></div>`;
 
   $app.querySelectorAll(".scale button").forEach(btn => btn.onclick = () => {
     const { c, k, v } = btn.dataset;
@@ -444,7 +449,7 @@ function renderPart1(){
     const missing = CRITERIA.filter(c => !draft.scores[c.id].daniela || !draft.scores[c.id].lila);
     CRITERIA.forEach(c => document.getElementById("card-" + c.id).classList.toggle("missing", missing.includes(c)));
     if (missing.length){
-      document.getElementById("err").textContent = `Please score both candidates on all criteria (${missing.length} incomplete).`;
+      document.getElementById("err").textContent = `Falta calificar a ambas candidatas en todos los criterios (${missing.length} incompletos).`;
       document.getElementById("card-" + missing[0].id).scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
@@ -459,15 +464,15 @@ function choiceHTML(attr, id, value, big){
 
 function renderPart2(){
   $app.innerHTML = progressHTML() + `
-    <div class="section-title">Part 2 of 3</div>
-    <p class="lead">For each question, choose one candidate.</p>
+    <div class="section-title">Parte 2 — Preguntas de contraste directo</div>
+    <p class="lead">Para cada pregunta, marca a la candidata que, en tu opinión, tiene la ventaja. No hay respuesta neutra — si genuinamente no puedes decidir, anótalo en la sesión de cierre.</p>
     ${QUESTIONS.map((q, i) => `
       <div class="card crit" id="card-${q.id}">
         <p class="q">${i + 1}. ${esc(q.text)}</p>
         ${choiceHTML("data-q", q.id, draft.comparisons[q.id])}
       </div>`).join("")}
     <div class="err" id="err"></div>
-    <div class="nav"><button class="btn ghost" id="back">← Back</button><button class="btn" id="next">Continue →</button></div>`;
+    <div class="nav"><button class="btn ghost" id="back">← Atrás</button><button class="btn" id="next">Continuar →</button></div>`;
 
   $app.querySelectorAll("[data-q]").forEach(btn => btn.onclick = () => {
     draft.comparisons[btn.dataset.q] = btn.dataset.v; saveDraft();
@@ -480,7 +485,7 @@ function renderPart2(){
     const missing = QUESTIONS.filter(q => !draft.comparisons[q.id]);
     QUESTIONS.forEach(q => document.getElementById("card-" + q.id).classList.toggle("missing", missing.includes(q)));
     if (missing.length){
-      document.getElementById("err").textContent = "Please answer all five questions.";
+      document.getElementById("err").textContent = "Responde las cinco preguntas.";
       document.getElementById("card-" + missing[0].id).scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
@@ -490,19 +495,19 @@ function renderPart2(){
 
 function renderPart3(){
   $app.innerHTML = progressHTML() + `
-    <div class="section-title">Part 3 of 3</div>
+    <div class="section-title">Parte 3 — Preferencia final</div>
     <div class="card" id="card-final">
-      <h3>Final preference</h3>
-      <p class="desc">All things considered, which candidate do you recommend?</p>
+      <h3>Preferencia final</h3>
+      <p class="desc">Independientemente de los puntajes anteriores, ¿a quién recomiendas nombrar Directora General del CHMD?</p>
       ${choiceHTML("data-final", "final", draft.final_choice, true)}
-      <label class="fld">Your reasoning (up to 3 short lines)</label>
+      <label class="fld">Razón principal (2–3 líneas)</label>
       <div class="lines">
         ${[0,1,2].map(i => `<input type="text" data-line="${i}" maxlength="240" placeholder="${i + 1}." value="${esc(draft.final_reasoning[i])}" />`).join("")}
       </div>
     </div>
     <div class="err" id="err"></div>
-    <div class="nav"><button class="btn ghost" id="back">← Back</button><button class="btn gold" id="submit">Submit evaluation</button></div>
-    <p class="muted center" style="font-size:13px">Submitting as <b>${esc(draft.name)}</b>. You will not be able to edit afterwards.</p>`;
+    <div class="nav"><button class="btn ghost" id="back">← Atrás</button><button class="btn gold" id="submit">Enviar valoración</button></div>
+    <p class="muted center" style="font-size:13px">Envías como <b>${esc(draft.name)}</b>. Después no podrás modificarla.</p>`;
 
   $app.querySelectorAll("[data-final]").forEach(btn => btn.onclick = () => {
     draft.final_choice = btn.dataset.v; saveDraft();
@@ -518,11 +523,11 @@ function renderPart3(){
 async function submit(){
   const err = document.getElementById("err");
   const btn = document.getElementById("submit");
-  if (!draft.final_choice){ err.textContent = "Please choose your final preference."; document.getElementById("card-final").classList.add("missing"); return; }
-  if (!draft.final_reasoning.some(x => x.trim())){ err.textContent = "Please write at least one line explaining your choice."; return; }
-  if (!confirm("Submit your evaluation now? You won't be able to change it.")) return;
+  if (!draft.final_choice){ err.textContent = "Elige tu preferencia final."; document.getElementById("card-final").classList.add("missing"); return; }
+  if (!draft.final_reasoning.some(x => x.trim())){ err.textContent = "Escribe al menos una línea con tu razón principal."; return; }
+  if (!confirm("¿Enviar tu valoración? Después no podrás modificarla.")) return;
 
-  btn.disabled = true; btn.textContent = "Submitting…"; err.textContent = "";
+  btn.disabled = true; btn.textContent = "Enviando…"; err.textContent = "";
   const row = {
     evaluator_name: draft.name.trim(),
     scores: draft.scores,
@@ -536,10 +541,10 @@ async function submit(){
     ls.del(LS_DRAFT);
     renderThanks(row.evaluator_name, false);
   } catch (e){
-    btn.disabled = false; btn.textContent = "Submit evaluation";
+    btn.disabled = false; btn.textContent = "Enviar valoración";
     err.textContent = e.message === "DUPLICATE"
-      ? "An evaluation under this name has already been submitted. If this is a mistake, contact the committee chair."
-      : "Could not submit. Check your connection and try again. (" + e.message + ")";
+      ? "Ya existe una valoración con este nombre. Si es un error, contacta a quien coordina el Comité."
+      : "No se pudo enviar. Revisa tu conexión e intenta de nuevo. (" + e.message + ")";
   }
 }
 
@@ -547,9 +552,9 @@ function renderThanks(name, already){
   $app.innerHTML = `
     <div class="card thanks center" style="margin-top:24px">
       <div class="check">✓</div>
-      <h2>Thank you${name ? ", " + esc(name.split(" ")[0]) : ""}</h2>
-      <p class="lead">${already ? "Your evaluation from this device has already been submitted." : "Your evaluation has been submitted successfully."}</p>
-      <p class="lead">Your responses are confidential and will be reviewed together with the rest of the committee.</p>
+      <h2>Gracias${name ? ", " + esc(name.split(" ")[0]) : ""}</h2>
+      <p class="lead">${already ? "Tu valoración desde este dispositivo ya fue enviada." : "Tu valoración se envió correctamente."}</p>
+      <p class="lead">Es confidencial y será el insumo, junto con la del resto del Comité, para la sesión de cierre.</p>
     </div>`;
   window.scrollTo(0, 0);
 }
@@ -565,25 +570,25 @@ let adminData = [];
 function renderAdminLogin(msg){
   $app.innerHTML = `
     <div class="card" style="margin-top:20px">
-      <h2>Committee admin</h2>
-      <p class="lead">Enter the admin password to view results.</p>
-      <label class="fld" for="pw">Password</label>
+      <h2>Administración</h2>
+      <p class="lead">Ingresa la contraseña para ver los resultados.</p>
+      <label class="fld" for="pw">Contraseña</label>
       <input type="password" id="pw" autocomplete="current-password" />
       <div class="err" id="err">${esc(msg || "")}</div>
-      <div class="nav"><button class="btn ghost" id="cancel">Cancel</button><button class="btn" id="go">View results</button></div>
+      <div class="nav"><button class="btn ghost" id="cancel">Cancelar</button><button class="btn" id="go">Ver resultados</button></div>
     </div>`;
   const pw = document.getElementById("pw");
   pw.focus();
   pw.addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("go").click(); });
   document.getElementById("cancel").onclick = () => { history.replaceState(null, "", location.pathname + location.search); renderEvaluator(); };
   document.getElementById("go").onclick = async () => {
-    const b = document.getElementById("go"); b.disabled = true; b.textContent = "Checking…";
+    const b = document.getElementById("go"); b.disabled = true; b.textContent = "Verificando…";
     try {
       adminData = await api.results(pw.value);
       adminPassword = pw.value;
       renderDashboard();
     } catch (e){
-      renderAdminLogin(e.message === "BAD_PASSWORD" ? "Incorrect password." : e.message);
+      renderAdminLogin(e.message === "BAD_PASSWORD" ? "Contraseña incorrecta." : e.message);
     }
   };
 }
@@ -611,14 +616,14 @@ function aggregate(rows){
 }
 
 function advChip(diff){
-  if (Math.abs(diff) < 0.05) return `<span class="chip tie">Tie</span>`;
+  if (Math.abs(diff) < 0.05) return `<span class="chip tie">Empate</span>`;
   const c = diff > 0 ? CANDIDATES[0] : CANDIDATES[1];
   return `<span class="chip ${c.cls}">${c.name} +${fmt(Math.abs(diff))}</span>`;
 }
 
 function splitBar(d, l){
   const t = d + l;
-  if (!t) return `<div class="split"><div style="flex:1;color:var(--muted)">No answers</div></div>`;
+  if (!t) return `<div class="split"><div style="flex:1;color:var(--muted)">Sin respuestas</div></div>`;
   return `<div class="split">
     ${d ? `<div class="d" style="flex:${d}">${Math.round(d / t * 100)}%</div>` : ""}
     ${l ? `<div class="l" style="flex:${l}">${Math.round(l / t * 100)}%</div>` : ""}
@@ -638,62 +643,62 @@ function renderDashboard(){
     <details class="ev">
       <summary>
         <div><div class="nm">${esc(r.evaluator_name)}</div>
-          <div class="sm">Weighted: <b style="color:var(--dan)">${fmt(wd)}</b> vs <b style="color:var(--lila)">${fmt(wl)}</b> · ${new Date(r.created_at).toLocaleString()}</div></div>
+          <div class="sm">Ponderado: <b style="color:var(--dan)">${fmt(wd)}</b> vs <b style="color:var(--lila)">${fmt(wl)}</b> · ${new Date(r.created_at).toLocaleString("es-MX")}</div></div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
           ${fc ? `<span class="chip ${fc.cls}">${fc.name}</span>` : ""}
-          ${mismatch ? `<span class="chip warn" title="Final choice differs from higher weighted score">≠ scores</span>` : ""}
+          ${mismatch ? `<span class="chip warn" title="Su preferencia final difiere de su puntaje ponderado más alto">≠ puntajes</span>` : ""}
         </div>
       </summary>
       <div class="ev-body">
         <table class="sc">
-          <thead><tr><th>Criterion</th><th style="text-align:center">Dan.</th><th style="text-align:center">Lila</th></tr></thead>
+          <thead><tr><th>Criterio</th><th style="text-align:center">Dan.</th><th style="text-align:center">Lila</th></tr></thead>
           <tbody>
           ${CRITERIA.map((c, i) => { const s = (r.scores && r.scores[c.id]) || {}; return `
             <tr><td>${i + 1}. ${esc(c.title)} <span class="muted">(${c.weight}%)</span>${s.note ? `<span class="obs">“${esc(s.note)}”</span>` : ""}</td>
             <td class="n dan">${esc(s.daniela ?? "–")}</td><td class="n lila">${esc(s.lila ?? "–")}</td></tr>`; }).join("")}
           </tbody>
         </table>
-        <div class="section-title" style="margin-top:16px">Comparison questions</div>
+        <div class="section-title" style="margin-top:16px">Preguntas de contraste</div>
         ${QUESTIONS.map((q, i) => { const v = r.comparisons && r.comparisons[q.id]; const c = candByName(v);
           return `<div class="kv">${i + 1}. ${esc(q.text)} → ${c ? `<b style="color:var(--${c.cls})">${c.name}</b>` : "–"}</div>`; }).join("")}
-        <div class="section-title" style="margin-top:16px">Final preference</div>
+        <div class="section-title" style="margin-top:16px">Preferencia final</div>
         <div class="kv">${fc ? `<b style="color:var(--${fc.cls})">${fc.name}</b>` : "–"}</div>
         ${(r.final_reasoning || []).length ? `<ol class="reason">${r.final_reasoning.map(x => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}
-        <div style="margin-top:16px;text-align:right"><button class="btn small danger" data-del="${esc(r.id)}" data-nm="${esc(r.evaluator_name)}">Delete this response</button></div>
+        <div style="margin-top:16px;text-align:right"><button class="btn small danger" data-del="${esc(r.id)}" data-nm="${esc(r.evaluator_name)}">Eliminar esta respuesta</button></div>
       </div>
     </details>`; }).join("");
 
   $app.innerHTML = `
-    <div class="section-title">Results dashboard</div>
+    <div class="section-title">Resultados del Comité</div>
     <div class="toolbar">
-      <button class="btn small" id="refresh">↻ Refresh</button>
-      <button class="btn small ghost" id="csv" ${A.n ? "" : "disabled"}>Export CSV</button>
-      <button class="btn small ghost" id="logout">Log out</button>
+      <button class="btn small" id="refresh">↻ Actualizar</button>
+      <button class="btn small ghost" id="csv" ${A.n ? "" : "disabled"}>Exportar CSV</button>
+      <button class="btn small ghost" id="logout">Salir</button>
     </div>
 
     <div class="card">
-      <h3>Total weighted score (out of 5)</h3>
+      <h3>Total ponderado (sobre 5)</h3>
       <div class="kpis" style="margin-top:12px">
         ${CANDIDATES.map(c => `<div class="kpi ${c.cls}"><div class="lbl">${c.name}</div>
           <div class="val">${fmt(A.total[c.key])}<small> / 5</small></div>
-          <div class="sub">${A.fin[c.name]} final vote${A.fin[c.name] === 1 ? "" : "s"}</div></div>`).join("")}
+          <div class="sub">${A.fin[c.name]} preferencia${A.fin[c.name] === 1 ? "" : "s"} final${A.fin[c.name] === 1 ? "" : "es"}</div></div>`).join("")}
       </div>
       <div class="meta">
-        <span>Evaluators: <b>${A.n}</b></span>
-        <span>Leader on score: <b>${lead ? `<span style="color:var(--${candByName(lead).cls})">${lead}</span> (+${fmt(Math.abs(A.total.daniela - A.total.lila))})` : (A.n ? "Tie" : "–")}</b></span>
+        <span>Evaluadores: <b>${A.n}</b></span>
+        <span>Ventaja en puntaje: <b>${lead ? `<span style="color:var(--${candByName(lead).cls})">${lead}</span> (+${fmt(Math.abs(A.total.daniela - A.total.lila))})` : (A.n ? "Empate" : "–")}</b></span>
       </div>
     </div>
 
     ${A.n ? `
     <div class="card">
-      <h3>Final preference</h3>
+      <h3>Preferencia final</h3>
       <div style="margin-top:12px">${splitBar(A.fin.Daniela, A.fin.Lila)}</div>
       <div class="qrow" style="border:0;padding-top:0"><div class="cnt"><span class="d">Daniela · ${A.fin.Daniela}</span><span class="l">Lila · ${A.fin.Lila}</span></div></div>
     </div>
 
     <div class="card">
-      <h3>Breakdown by criterion</h3>
-      <p class="desc" style="margin-bottom:4px">Average score per candidate (1–5). ★ = highest weight.</p>
+      <h3>Desglose por criterio</h3>
+      <p class="desc" style="margin-bottom:4px">Promedio por candidata (1–5). ★ = criterio de mayor peso.</p>
       ${A.crit.map((x, i) => `
         <div class="crow ${x.c.key ? "key" : ""}">
           <div class="top"><span class="t">${i + 1}. ${esc(x.c.title)} <span class="muted">· ${x.c.weight}%</span></span>${advChip(x.diff)}</div>
@@ -704,7 +709,7 @@ function renderDashboard(){
     </div>
 
     <div class="card">
-      <h3>Comparison questions</h3>
+      <h3>Preguntas de contraste</h3>
       ${A.q.map((x, i) => `
         <div class="qrow"><p>${i + 1}. ${esc(x.q.text)}</p>
           ${splitBar(x.t.Daniela, x.t.Lila)}
@@ -713,10 +718,10 @@ function renderDashboard(){
     </div>
 
     <div class="card">
-      <h3>Individual responses</h3>
-      <p class="desc">Tap a name to expand. “≠ scores” marks evaluators whose final choice differs from their own higher weighted score.</p>
+      <h3>Respuestas individuales</h3>
+      <p class="desc">Toca un nombre para ver el detalle. “≠ puntajes” marca a quien eligió una candidata distinta a la que salió mejor en sus propios puntajes.</p>
       ${evCards}
-    </div>` : `<div class="card center"><p class="lead">No evaluations submitted yet.</p></div>`}
+    </div>` : `<div class="card center"><p class="lead">Todavía no hay valoraciones enviadas.</p></div>`}
   `;
 
   document.getElementById("refresh").onclick = async () => {
@@ -729,18 +734,18 @@ function renderDashboard(){
   };
   document.getElementById("csv").onclick = exportCSV;
   $app.querySelectorAll("[data-del]").forEach(b => b.onclick = async () => {
-    if (!confirm(`Delete the evaluation from "${b.dataset.nm}"? This cannot be undone.`)) return;
+    if (!confirm(`¿Eliminar la valoración de "${b.dataset.nm}"? No se puede deshacer.`)) return;
     try { await api.remove(adminPassword, b.dataset.del); adminData = await api.results(adminPassword); renderDashboard(); }
     catch (e){ alert(e.message); }
   });
 }
 
 function exportCSV(){
-  const head = ["Evaluator", "Submitted"];
-  CRITERIA.forEach((c, i) => head.push(`C${i + 1} Daniela`, `C${i + 1} Lila`, `C${i + 1} Note`));
-  head.push("Weighted Daniela", "Weighted Lila");
+  const head = ["Evaluador", "Fecha de envío"];
+  CRITERIA.forEach((c, i) => head.push(`C${i + 1} Daniela`, `C${i + 1} Lila`, `C${i + 1} Evidencia`));
+  head.push("Ponderado Daniela", "Ponderado Lila");
   QUESTIONS.forEach((q, i) => head.push(`Q${i + 1}`));
-  head.push("Final choice", "Reason 1", "Reason 2", "Reason 3");
+  head.push("Preferencia final", "Razón 1", "Razón 2", "Razón 3");
   const rows = adminData.map(r => {
     const out = [r.evaluator_name, r.created_at];
     CRITERIA.forEach(c => { const s = (r.scores && r.scores[c.id]) || {}; out.push(s.daniela ?? "", s.lila ?? "", s.note || ""); });
@@ -753,7 +758,7 @@ function exportCSV(){
   const csv = [head, ...rows].map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\r\n");
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }));
-  a.download = "chmd-committee-results.csv";
+  a.download = "chmd-resultados-comite.csv";
   document.body.appendChild(a); a.click(); a.remove();
 }
 

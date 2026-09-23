@@ -1,6 +1,6 @@
 # CHMD · Herramienta de evaluación del Comité
 
-Formulario de evaluación de candidatas (Daniela y Lila) con dashboard de resultados protegido por contraseña.
+Versión digital del *Instrumento de Valoración Final* (sept. 2026): evaluación de candidatas (Daniela y Lila) con dashboard de resultados protegido por contraseña.
 Funciona sin login: un solo link para celular o computadora.
 
 **Archivos**
@@ -16,16 +16,16 @@ Funciona sin login: un solo link para celular o computadora.
 - Cada evaluador solo puede **enviar** su evaluación. Nadie puede leer las respuestas con el link público.
 - Los resultados solo se entregan si la contraseña es correcta. **La revisa Supabase en su servidor**, así que la contraseña no aparece en el código de la página.
 - Una sola respuesta por nombre (en la base de datos) y por dispositivo (localStorage).
-- Para entrar al dashboard: link **"Committee admin"** al pie de la página, o agrega `#admin` al final de la URL.
+- Para entrar al dashboard: link **"Administración"** al pie de la página, o agrega `#admin` al final de la URL.
 
 ---
 
 ## Paso 0: probarla sin configurar nada (5 minutos)
 
 1. Descarga `index.html` y ábrelo con doble clic en tu navegador.
-2. Verás un aviso naranja de **"Demo mode"**: las respuestas se guardan solo en ese navegador.
+2. Verás un aviso naranja de **"Modo demo"**: las respuestas se guardan solo en ese navegador.
 3. Llena 2 o 3 evaluaciones con nombres distintos. Después de cada envío, para simular a otra persona, abre la página en una ventana de incógnito.
-4. Entra a "Committee admin" con `MaguenDavid-2026` para ver el dashboard.
+4. Entra a "Administración" con `MaguenDavid-2026` para ver el dashboard.
 
 ---
 
@@ -54,7 +54,7 @@ Funciona sin login: un solo link para celular o computadora.
    SUPABASE_URL: "https://abcd1234.supabase.co",
    SUPABASE_ANON_KEY: "eyJhbGciOi...tu-llave-completa...",
    ```
-3. Guarda. Al abrir la página ya **no** debe aparecer el aviso naranja de "Demo mode".
+3. Guarda. Al abrir la página ya **no** debe aparecer el aviso naranja de "Modo demo".
 
 ## Paso 3: publicarla en internet (3 minutos, gratis)
 
@@ -70,7 +70,7 @@ Funciona sin login: un solo link para celular o computadora.
 
 1. Abre el link en tu celular, llena una evaluación de prueba con el nombre `PRUEBA`.
 2. Entra a `#admin` con la contraseña y confirma que aparece.
-3. En la tarjeta de `PRUEBA`, usa **Delete this response** para borrarla.
+3. En la tarjeta de `PRUEBA`, usa **Eliminar esta respuesta** para borrarla.
 4. Manda el link al comité. **No compartas** la contraseña ni el link con `#admin`.
 
 ---
@@ -80,7 +80,7 @@ Funciona sin login: un solo link para celular o computadora.
 | Qué quieres cambiar | Dónde |
 |---|---|
 | Contraseña de admin | `supabase-setup.sql`, línea marcada `ADMIN PASSWORD` → vuelve a correr el archivo completo en SQL Editor. (En modo demo: `DEMO_ADMIN_PASSWORD` en `index.html`.) |
-| Descripciones de criterios | `index.html` → lista `CRITERIA`, campo `desc`. |
+| Descripciones de criterios (hoy: texto literal del Instrumento) | `index.html` → lista `CRITERIA`, campo `desc`. |
 | Pesos | `index.html` → lista `CRITERIA`, campo `weight` (deben sumar 100). |
 | Preguntas de comparación | `index.html` → lista `QUESTIONS`. |
 | Borrar todo al cerrar el proceso | Supabase → SQL Editor → `delete from public.evaluations;` |
@@ -93,12 +93,12 @@ Cambia descripciones y pesos **antes** de que el comité empiece a responder: el
 - Preferencia final: Daniela vs Lila.
 - Por criterio: promedio de cada candidata y quién tiene ventaja (★ = criterio de mayor peso).
 - Preguntas de comparación: conteo y % por pregunta.
-- Respuestas individuales desplegables (puntajes, notas, comparaciones y razonamiento final). La etiqueta **"≠ scores"** marca a quien eligió una candidata distinta a la que salió mejor en sus propios puntajes: conviene conversarlo en la sesión.
-- **Export CSV** para archivo o para abrir en Excel.
+- Respuestas individuales desplegables (puntajes, notas, comparaciones y razonamiento final). La etiqueta **"≠ puntajes"** marca a quien eligió una candidata distinta a la que salió mejor en sus propios puntajes: conviene conversarlo en la sesión.
+- **Exportar CSV** para archivo o para abrir en Excel.
 
 ## Solución de problemas
 
-- **"Could not submit… Server error (401/404)"**: la URL o la llave de Supabase están mal copiadas, o no corriste el SQL.
-- **"Incorrect password"** con la contraseña correcta: revisa que corriste la versión más reciente del SQL (paso 1.4).
-- **Un evaluador dice que ya envió pero no aparece**: pídele que lo haga desde el mismo dispositivo; si el mensaje es "already been submitted", su respuesta sí está guardada.
+- **"No se pudo enviar… Error del servidor (401/404)"**: la URL o la llave de Supabase están mal copiadas, o no corriste el SQL.
+- **"Contraseña incorrecta"** con la contraseña correcta: revisa que corriste la versión más reciente del SQL (paso 1.4).
+- **Un evaluador dice que ya envió pero no aparece**: pídele que lo haga desde el mismo dispositivo; si el mensaje es "Ya existe una valoración con este nombre", su respuesta sí está guardada.
 - **Alguien necesita volver a responder**: bórralo desde el dashboard y pídele que abra la página en otro navegador o en modo incógnito.

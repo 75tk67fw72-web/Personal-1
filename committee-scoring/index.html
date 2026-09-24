@@ -216,7 +216,7 @@
 const CONFIG = {
   // Dirección del servicio de Google Apps Script (termina en /exec). Ver README, paso 1.
   // Si se deja así, la app funciona en modo demo.
-  APPS_SCRIPT_URL: "PEGA-AQUI-LA-DIRECCION-DE-APPS-SCRIPT",
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwRyY42LzxLETq-eII30DQjahoHNLMlCrl1Iz0s_X9wRE28JBWZAeD23oMe16MbEYzj/exec",
 
   // Se usa SOLO en modo demo. En vivo, la contraseña la valida Google Apps Script
   // y nunca aparece en esta página. No pongas aquí la contraseña real: esta página es pública.
@@ -287,7 +287,8 @@ const QUESTIONS = [
 /* =====================================================================
    Almacenamiento (Google Sheets vía Apps Script, o memoria del navegador en modo demo)
    ===================================================================== */
-const DEMO = !/^https:\/\/script\.google\.com\/.+\/exec$/.test(CONFIG.APPS_SCRIPT_URL.trim());
+// Modo demo: sin URL de Apps Script, o con ?demo=1 en la dirección (para practicar sin tocar la hoja real).
+const DEMO = !/^https:\/\/script\.google\.com\/.+\/exec$/.test(CONFIG.APPS_SCRIPT_URL.trim()) || /[?&]demo=1\b/.test(location.search);
 const LS_SUBMITTED = "chmd_eval_submitted_v1";
 const LS_DRAFT = "chmd_eval_draft_v2";
 const LS_DEMO_DB = "chmd_eval_demo_db_v1";
@@ -299,13 +300,26 @@ const ls = {
 };
 
 // Content-Type text/plain evita la verificación previa (CORS) que Apps Script no acepta.
+// Si falla la conexión, reintenta hasta 2 veces (Google a veces tarda en "despertar" el servicio).
+async function postScript(body){
+  for (let intento = 0; ; intento++){
+    try {
+      return { res: await fetch(CONFIG.APPS_SCRIPT_URL.trim(), {
+        method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body),
+      }), reintentado: intento > 0 };
+    } catch (e){
+      if (!(e instanceof TypeError) || intento >= 2) throw e;
+      await new Promise(r => setTimeout(r, 1500 * (intento + 1)));
+    }
+  }
+}
 async function callScript(body){
-  const res = await fetch(CONFIG.APPS_SCRIPT_URL.trim(), {
-    method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body),
-  });
+  const { res, reintentado } = await postScript(body);
   if (!res.ok) throw new Error("error del servidor, código " + res.status);
   let out;
   try { out = await res.json(); } catch { throw new Error("respuesta inesperada del servidor; revisa que el servicio esté publicado para «Cualquier persona»"); }
+  // Un envío reintentado que choca con su propio primer intento ya quedó guardado.
+  if (!out.ok && out.error === "DUPLICATE" && reintentado && body.action === "submit") return { ok: true };
   if (!out.ok) throw new Error(out.error === "INVALID" ? "datos incompletos o inválidos" : (out.error || "error del servidor"));
   return out;
 }

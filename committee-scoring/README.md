@@ -19,12 +19,14 @@ Un solo enlace, en celular o computadora, sin cuentas ni inicio de sesión.
 
 ---
 
-## Paso 0: probarla sin configurar nada (5 minutos)
+## Paso 0: practicar sin tocar la hoja real
 
-1. Descarga `index.html` y ábrelo con doble clic en tu navegador.
+1. Abre el enlace agregando `?demo=1`: `https://75tk67fw72-web.github.io/Personal-1/committee-scoring/?demo=1`
 2. Verás un aviso naranja de **"Modo demo"**: las respuestas se guardan solo en ese navegador.
 3. Llena 2 o 3 valoraciones con nombres distintos (para simular a otra persona, usa una ventana de incógnito).
 4. Entra a "Administración" con `demo` para ver el tablero.
+
+> La página necesita estar publicada (dirección `https://`). Abierto como archivo desde tu computadora, Google no acepta la conexión.
 
 ---
 

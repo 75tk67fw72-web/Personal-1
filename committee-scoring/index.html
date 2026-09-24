@@ -46,6 +46,8 @@
   .progress{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 0 10px;border-bottom:1px solid var(--border);margin-bottom:16px}
   .progress .row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:6px}
   .progress .row b{color:var(--navy)}
+  .progress .row > span{white-space:nowrap}
+  .progress .pend{font-size:12px;font-weight:700;color:#8A4B00;margin:-2px 0 6px}
   .bar{height:6px;background:#dfe4eb;border-radius:4px;overflow:hidden}
   .bar i{display:block;height:100%;background:var(--gold);width:0;transition:width .25s}
 
@@ -83,15 +85,26 @@
   .crit.key .weight{background:var(--gold);color:var(--navy)}
   .flag{display:inline-block;margin:8px 0 0;font-size:12px;font-weight:700;color:#7a5c12;background:var(--gold-soft);border:1px solid #ead9a6;border-radius:6px;padding:3px 8px}
   .desc{color:var(--muted);font-size:14px;margin:8px 0 12px}
-  .cand-row{display:grid;grid-template-columns:72px 1fr;align-items:center;gap:10px;margin:8px 0}
+  .cand-row{display:grid;grid-template-columns:62px 1fr;align-items:center;gap:10px;margin:8px 0}
   .cand-name{font-weight:700;font-size:14px}
   .cand-name.dan{color:var(--dan)} .cand-name.lila{color:var(--lila)}
-  .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .scale{display:grid;grid-template-columns:repeat(5,1fr) 1.15fr;gap:5px}
+  .scale button.no{font-size:13px;color:var(--muted);background:#F6F7F9;border-style:dashed}
+  .scale button.no.on{background:#6B7280;border-color:#6B7280;border-style:solid;color:#fff}
   .scale button{border:1px solid #cdd4de;background:#fff;border-radius:9px;height:44px;font-weight:700;cursor:pointer;font-size:16px}
   .scale.dan button.on{background:var(--dan);border-color:var(--dan);color:#fff}
   .scale.lila button.on{background:var(--lila);border-color:var(--lila);color:#fff}
-  .legend{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center;font-size:11px;line-height:1.2;color:var(--muted);margin:2px 0 0 82px}
+  .legend{display:grid;grid-template-columns:repeat(5,1fr) 1.15fr;gap:5px;hyphens:manual;text-align:center;font-size:11px;line-height:1.2;color:var(--muted);margin:2px 0 0 72px}
   .note{margin-top:10px}
+  .guide{margin:8px 0 4px;font-size:14px;color:var(--text)}
+  details.more{margin:0 0 10px}
+  details.more summary{cursor:pointer;font-size:13px;color:var(--navy);font-weight:600}
+  details.more .desc{margin:6px 0}
+  .group{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:4px}
+  .rules{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--muted);display:grid;gap:6px}
+  .rules b{color:var(--navy)}
+  label.need{display:block;font-size:13px;font-weight:700;color:#8A4B00;margin-bottom:6px}
+  .addnote{background:none;border:0;padding:4px 0;color:var(--navy);font-size:14px;font-weight:600;cursor:pointer}
   .note textarea{min-height:44px;font-size:15px;padding:10px 12px}
 
   /* Choice buttons */
@@ -134,6 +147,7 @@
   .hbar .track{height:10px;background:#EEF1F5;border-radius:6px;overflow:hidden}
   .hbar .fill{height:100%;border-radius:6px}
   .hbar .v{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+  .nocount{font-size:12px;color:var(--muted);margin-top:4px}
   .chip{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
   .chip.dan{background:var(--dan-soft);color:var(--dan)}
   .chip.lila{background:var(--lila-soft);color:var(--lila)}
@@ -217,30 +231,50 @@ const CANDIDATES = [
 ];
 
 // Texto tomado del "Instrumento de Valoración Final" (septiembre 2026).
-// Los pesos deben sumar 100. `desc` puede tener uno o varios párrafos.
+// `guide` = guía breve visible; `desc` = guía completa (desplegable).
+// Pesos: deben sumar 100. 10a y 10b se evalúan por separado y comparten el 2% (1% c/u).
 const CRITERIA = [
-  { id: "c1",  title: "Liderazgo estratégico y visión", weight: 15,
+  { id: "c1",  num: "1",  title: "Liderazgo estratégico y visión", weight: 15,
+    guide: "Visión de largo plazo que integre lo académico, lo judío y lo comunitario, y la traduzca en dirección concreta.",
     desc: ["¿Puede articular una visión de largo plazo para el CHMD y convertirla en dirección concreta? ¿Su visión integra lo académico, lo judío y lo comunitario, o los trata como mundos separados?"] },
-  { id: "c2",  title: "Capacidad de transformación", weight: 15,
+  { id: "c2",  num: "2",  title: "Capacidad de transformación", weight: 15,
+    guide: "Mejora significativa sin desestabilizar: construir desde lo que el CHMD ya es, no importar un modelo externo.",
     desc: ["¿Puede desafiar la práctica actual, superar la resistencia y liderar mejora significativa sin desestabilizar el colegio? ¿Entiende que transformar el CHMD es construir desde lo que ya es, no importar un modelo externo?"] },
-  { id: "c3",  title: "Liderazgo educativo y académico", weight: 12,
+  { id: "c3",  num: "3",  title: "Liderazgo educativo y académico", weight: 12,
+    guide: "Trayectoria real de mejora en aprendizaje y resultados, dominio del IB y criterio pedagógico propio.",
     desc: ["¿Tiene trayectoria real de mejora en enseñanza, aprendizaje, evaluación y resultados? ¿Conoce el programa IB desde adentro? ¿Su criterio pedagógico es propio o depende de lo que le dicen los coordinadores?"] },
-  { id: "c4",  title: "Identidad judía y alineación cultural", weight: 18, key: true,
+  { id: "c4",  num: "4",  title: "Identidad judía y alineación cultural", weight: 18, key: true,
+    guide: "No si es judía, sino si defenderá la identidad judía como eje no negociable cuando se le presione.",
     desc: ["No evalúa si la candidata es judía. Evalúa si puede defender la identidad judía como el eje no negociable del colegio cuando una familia la cuestiona, cuando un docente la resiste, o cuando el calendario académico la presiona.",
            "¿Comprende que el judaísmo en el CHMD no es cultura a respetar, sino misión a sostener? ¿Tiene convicción genuina o deferencia protocolar?"] },
-  { id: "c5",  title: "Liderazgo comunitario y stakeholders", weight: 10,
+  { id: "c5",  num: "5",  title: "Liderazgo comunitario y stakeholders", weight: 10,
+    guide: "Confianza simultánea con Patronato, padres, docentes y comunidad judía. ¿Convoca o impone?",
     desc: ["¿Puede construir confianza simultánea con el Patronato, los padres, el equipo docente y la comunidad judía? ¿Su liderazgo convoca o impone? ¿La seguirían quienes más necesita que la sigan?"] },
-  { id: "c6",  title: "Liderazgo de personas y cultura", weight: 8,
+  { id: "c6",  num: "6",  title: "Liderazgo de personas y cultura", weight: 8,
+    guide: "Inspira, desarrolla y exige a la vez; sabe manejar la resistencia de personal con muchos años en el colegio.",
     desc: ["¿Puede inspirar, desarrollar y responsabilizar a su equipo al mismo tiempo? ¿Genera una cultura de trabajo positiva y de alto desempeño? ¿Cómo maneja a quien resiste el cambio con muchos años en el colegio?"] },
-  { id: "c7",  title: "Liderazgo de organización compleja", weight: 8,
+  { id: "c7",  num: "7",  title: "Liderazgo de organización compleja", weight: 8,
+    guide: "Evidencia de haber dirigido con éxito una institución de escala y complejidad comparable al CHMD.",
     desc: ["¿Tiene evidencia de haber dirigido exitosamente una institución de escala y complejidad comparable al CHMD, con múltiples stakeholders y prioridades en tensión permanente?"] },
-  { id: "c8",  title: "Cualidades personales y presencia", weight: 7,
+  { id: "c8",  num: "8",  title: "Cualidades personales y presencia", weight: 7,
+    guide: "Juicio, inteligencia emocional, resiliencia e integridad; la misma persona en la junta y en el pasillo.",
     desc: ["¿Tiene juicio, inteligencia emocional, resiliencia e integridad? ¿Genera credibilidad y confianza de forma natural? ¿Es auténtica — lo mismo en la sala de reuniones que en el pasillo del colegio?"] },
-  { id: "c9",  title: "Gobernanza y relación con el Patronato", weight: 5,
+  { id: "c9",  num: "9",  title: "Gobernanza y relación con el Patronato", weight: 5,
+    guide: "Comunica temas difíciles, rinde cuentas y distingue por instinto su autoridad de la del Patronato.",
     desc: ["¿Puede trabajar efectivamente con el Patronato, comunicar temas difíciles con claridad y establecer accountability apropiado? ¿Entiende dónde termina su autoridad y dónde empieza la del Patronato — de forma instintiva, no solo de forma teórica?"] },
-  { id: "c10", title: "Liderazgo financiero y operativo", weight: 2,
-    desc: ["¿Tiene capacidad de gestión de presupuestos, recursos e instalaciones? ¿Entiende la relación entre sostenibilidad financiera y misión educativa? Este criterio tiene menor peso porque ambas candidatas tienen esta base cubierta."] },
+  { id: "c10a", num: "10a", title: "Liderazgo financiero", weight: 1, group: "Finanzas y operación · 2% combinado",
+    guide: "Gestión de presupuestos y recursos; sostenibilidad financiera al servicio de la misión educativa.",
+    desc: ["¿Tiene capacidad de gestión de presupuestos y recursos? ¿Entiende la relación entre sostenibilidad financiera y misión educativa?",
+           "Se evalúa por separado de la operación; ambos comparten el 2% del criterio original. Tiene menor peso porque ambas candidatas tienen esta base cubierta."] },
+  { id: "c10b", num: "10b", title: "Liderazgo operativo", weight: 1, group: "Finanzas y operación · 2% combinado",
+    guide: "Gestión disciplinada de instalaciones, procesos y operación diaria del colegio.",
+    desc: ["¿Gestiona con disciplina las instalaciones, los procesos y la operación diaria del colegio? ¿Anticipa problemas y asegura que la operación sirva al proyecto educativo?",
+           "Se evalúa por separado de las finanzas; ambos comparten el 2% del criterio original."] },
 ];
+
+// Evidencia escrita obligatoria solo si hay puntaje extremo o diferencia importante.
+const EVIDENCE_RULE = { extremes: [1, 5], minGap: 2 };
+const NO = "NO"; // N/O – no observado / información insuficiente
 
 const QUESTIONS = [
   { id: "q1", text: "¿Quién está más capacitada para liderar la transformación estratégica que el CHMD necesita en los próximos 5–7 años?" },
@@ -255,7 +289,7 @@ const QUESTIONS = [
    ===================================================================== */
 const DEMO = !/^https:\/\//.test(CONFIG.SUPABASE_URL) || CONFIG.SUPABASE_ANON_KEY.startsWith("YOUR_");
 const LS_SUBMITTED = "chmd_eval_submitted_v1";
-const LS_DRAFT = "chmd_eval_draft_v1";
+const LS_DRAFT = "chmd_eval_draft_v2";
 const LS_DEMO_DB = "chmd_eval_demo_db_v1";
 
 const ls = {
@@ -323,10 +357,19 @@ const $app = document.getElementById("app");
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 const fmt = (n, d = 2) => (n == null || isNaN(n)) ? "–" : n.toFixed(d);
 const candByName = n => CANDIDATES.find(c => c.name === n);
+const isNum = v => typeof v === "number" && v >= 1 && v <= 5;
+const showVal = v => v === NO ? "N/O" : (v ?? "–");
+// Ponderado individual: excluye N/O y reescala sobre el peso efectivamente evaluado.
 function weighted(scores, candKey){
-  let t = 0;
-  for (const c of CRITERIA){ const v = scores && scores[c.id] && scores[c.id][candKey]; if (v) t += v * c.weight / 100; }
-  return t;
+  let t = 0, w = 0;
+  for (const c of CRITERIA){ const v = scores && scores[c.id] && scores[c.id][candKey]; if (isNum(v)){ t += v * c.weight; w += c.weight; } }
+  return w ? t / w : null;
+}
+function evidenceReason(s){
+  const vals = [s.daniela, s.lila];
+  if (vals.some(v => EVIDENCE_RULE.extremes.includes(v))) return "puntaje extremo (1 o 5)";
+  if (isNum(s.daniela) && isNum(s.lila) && Math.abs(s.daniela - s.lila) >= EVIDENCE_RULE.minGap) return `diferencia de ${Math.abs(s.daniela - s.lila)} puntos entre candidatas`;
+  return null;
 }
 
 /* =====================================================================
@@ -339,17 +382,24 @@ function blankDraft(){
   QUESTIONS.forEach(q => comparisons[q.id] = null);
   return { step: 0, name: "", scores, comparisons, final_choice: null, final_reasoning: ["", "", ""] };
 }
-let draft = Object.assign(blankDraft(), ls.get(LS_DRAFT) || {});
+let draft = (() => {
+  const d = blankDraft(), saved = ls.get(LS_DRAFT) || {};
+  Object.assign(d, saved, { scores: d.scores, comparisons: Object.assign(d.comparisons, saved.comparisons || {}) });
+  CRITERIA.forEach(c => Object.assign(d.scores[c.id], (saved.scores || {})[c.id] || {}));
+  return d;
+})();
 const saveDraft = () => ls.set(LS_DRAFT, draft);
 
 const STEPS = ["Inicio", "Parte 1 · Puntajes", "Parte 2 · Contraste", "Parte 3 · Preferencia final"];
 
 function progressHTML(){
-  let done = 0, total = 0, label = "";
+  let done = 0, total = 0, label = "", extra = "";
   if (draft.step === 1){
     total = CRITERIA.length * 2;
     CRITERIA.forEach(c => { if (draft.scores[c.id].daniela) done++; if (draft.scores[c.id].lila) done++; });
+    const needNote = CRITERIA.filter(c => evidenceReason(draft.scores[c.id]) && !draft.scores[c.id].note.trim()).length;
     label = done + " / " + total + " puntajes";
+    if (needNote) extra = `${needNote} evidencia${needNote > 1 ? "s" : ""} escrita${needNote > 1 ? "s" : ""} pendiente${needNote > 1 ? "s" : ""}`;
   } else if (draft.step === 2){
     total = QUESTIONS.length; done = QUESTIONS.filter(q => draft.comparisons[q.id]).length;
     label = done + " / " + total + " respondidas";
@@ -359,7 +409,8 @@ function progressHTML(){
   }
   const pct = ((draft.step - 1) / 3 + (total ? done / total / 3 : 0)) * 100;
   return `<div class="progress" id="progress">
-    <div class="row"><span><b>${esc(STEPS[draft.step])}</b> · Paso ${draft.step} de 3</span><span>${label}</span></div>
+    <div class="row"><span><b>${esc(STEPS[draft.step])}</b> <span class="muted">(${draft.step}/3)</span></span><span>${label}</span></div>
+    ${extra ? `<div class="pend">${extra}</div>` : ""}
     <div class="bar"><i style="width:${Math.max(3, pct)}%"></i></div>
   </div>`;
 }
@@ -384,7 +435,7 @@ function renderWelcome(){
       <p class="lead" style="margin-bottom:4px"><b style="color:var(--dan)">Daniela</b> · <b style="color:var(--lila)">Lila</b></p>
       <p class="lead">Hemos llegado al momento más importante del proceso. Después de revisar los casos, la entrevista virtual y la visita presencial, cada miembro del Comité tiene una impresión formada. Este instrumento está diseñado para que esa impresión se convierta en una valoración estructurada — no para reemplazar el criterio de cada quien, sino para darle forma comparable.</p>
       <ol class="muted" style="margin:10px 0 0;padding-left:20px;font-size:15px">
-        <li>Puntajes por criterio: cada candidata del 1 al 5</li>
+        <li>Puntajes por criterio: cada candidata del 1 al 5, o N/O si no tienes base</li>
         <li>Cinco preguntas directas de contraste</li>
         <li>Tu preferencia final y razón principal</li>
       </ol>
@@ -410,46 +461,76 @@ function scaleHTML(cid, cand){
   for (let i = 1; i <= 5; i++){
     b += `<button type="button" class="${v === i ? "on" : ""}" data-c="${cid}" data-k="${cand.key}" data-v="${i}" aria-label="${cand.name}: ${i} (${SCALE[i - 1]})" aria-pressed="${v === i}">${i}</button>`;
   }
+  b += `<button type="button" class="no ${v === NO ? "on" : ""}" data-c="${cid}" data-k="${cand.key}" data-v="${NO}" aria-label="${cand.name}: no observado / información insuficiente" aria-pressed="${v === NO}">N/O</button>`;
   return `<div class="cand-row"><span class="cand-name ${cand.cls}">${cand.name}</span><div class="scale ${cand.cls}">${b}</div></div>`;
 }
 
+function noteHTML(cid){
+  const s = draft.scores[cid], reason = evidenceReason(s);
+  if (reason) return `<label class="need" for="note-${cid}">Evidencia requerida · ${esc(reason)}</label>
+    <textarea id="note-${cid}" data-note="${cid}" maxlength="500" placeholder="¿Qué observaste concretamente que justifica este puntaje?">${esc(s.note)}</textarea>`;
+  if (s.note || s.open) return `<textarea id="note-${cid}" data-note="${cid}" maxlength="500" placeholder="Evidencia observada (opcional)">${esc(s.note)}</textarea>`;
+  return `<button type="button" class="addnote" data-open="${cid}">+ Agregar evidencia (opcional)</button>`;
+}
+function bindNote(cid){
+  const box = document.getElementById("note-box-" + cid);
+  const t = box.querySelector("textarea"), o = box.querySelector("[data-open]");
+  if (t) t.oninput = () => { draft.scores[cid].note = t.value; saveDraft(); if (t.value.trim()) box.closest(".crit").classList.remove("missing"); refreshProgress(); };
+  if (o) o.onclick = () => { draft.scores[cid].open = true; box.innerHTML = noteHTML(cid); bindNote(cid); box.querySelector("textarea").focus(); };
+}
+const cardIncomplete = c => { const s = draft.scores[c.id]; return !s.daniela || !s.lila || (evidenceReason(s) && !s.note.trim()); };
+
 function renderPart1(){
-  const cards = CRITERIA.map((c, i) => `
+  const cards = CRITERIA.map(c => `
     <div class="card crit ${c.key ? "key" : ""}" id="card-${c.id}">
+      ${c.group ? `<div class="group">${esc(c.group)}</div>` : ""}
       <div class="head">
-        <h3><span class="num">${i + 1}.</span>${esc(c.title)}</h3>
+        <h3><span class="num">${c.num}.</span>${esc(c.title)}</h3>
         <span class="weight">${c.weight}%</span>
       </div>
       ${c.key ? `<span class="flag">★ Criterio de mayor peso</span>` : ""}
-      ${c.desc.map(d => `<p class="desc">${esc(d)}</p>`).join("")}
+      <p class="guide">${esc(c.guide)}</p>
+      <details class="more"><summary>Ver guía completa</summary>${c.desc.map(d => `<p class="desc">${esc(d)}</p>`).join("")}</details>
       ${CANDIDATES.map(cd => scaleHTML(c.id, cd)).join("")}
-      <div class="legend">${SCALE.map(l => `<span>${l}</span>`).join("")}</div>
-      <div class="note"><textarea data-note="${c.id}" maxlength="500" placeholder="Evidencia observada (opcional)">${esc(draft.scores[c.id].note)}</textarea></div>
+      <div class="legend">${SCALE.map(l => `<span>${l.replace("Excepcional", "Excep&shy;cional")}</span>`).join("")}<span>Sin base</span></div>
+      <div class="note" id="note-box-${c.id}">${noteHTML(c.id)}</div>
     </div>`).join("");
 
   $app.innerHTML = progressHTML() + `
     <div class="section-title">Parte 1 — Puntajes por criterio</div>
-    <p class="lead">Para cada criterio: lee la descripción, piensa en evidencia concreta que observaste, y marca el puntaje para cada candidata.</p>
-    <p class="lead" style="font-size:14px"><b>Escala:</b> 1 Muy débil · 2 Débil · 3 Cumple · 4 Sólido · 5 Excepcional</p>
+    <p class="lead">Marca el puntaje de cada candidata pensando en evidencia concreta que observaste. No necesitas calcular nada: la herramienta calcula el ponderado.</p>
+    <div class="rules">
+      <div><b>Escala:</b> 1 Muy débil · 2 Débil · 3 Cumple · 4 Sólido · 5 Excepcional</div>
+      <div><b>N/O</b> = no observado / información insuficiente. Ese criterio se excluye de tu cálculo y tu resultado ponderado se ajusta sobre los criterios efectivamente evaluados.</div>
+      <div><b>Evidencia escrita:</b> solo se pide cuando das un 1 o un 5, o cuando hay 2+ puntos de diferencia entre candidatas.</div>
+    </div>
     ${cards}
     <div class="err" id="err"></div>
     <div class="nav"><button class="btn ghost" id="back">← Atrás</button><button class="btn" id="next">Continuar →</button></div>`;
 
   $app.querySelectorAll(".scale button").forEach(btn => btn.onclick = () => {
     const { c, k, v } = btn.dataset;
-    draft.scores[c][k] = +v; saveDraft();
+    draft.scores[c][k] = v === NO ? NO : +v; saveDraft();
     btn.parentElement.querySelectorAll("button").forEach(b => { b.classList.toggle("on", b === btn); b.setAttribute("aria-pressed", b === btn); });
+    const box = document.getElementById("note-box-" + c);
+    const had = !!box.querySelector("label.need"), needs = !!evidenceReason(draft.scores[c]);
+    if (had !== needs || needs){ box.innerHTML = noteHTML(c); bindNote(c); }
     const card = document.getElementById("card-" + c);
-    if (draft.scores[c].daniela && draft.scores[c].lila) card.classList.remove("missing");
+    if (!cardIncomplete(CRITERIA.find(x => x.id === c))) card.classList.remove("missing");
     refreshProgress();
   });
-  $app.querySelectorAll("textarea[data-note]").forEach(t => t.oninput = () => { draft.scores[t.dataset.note].note = t.value; saveDraft(); });
+  CRITERIA.forEach(c => bindNote(c.id));
   document.getElementById("back").onclick = () => goStep(0);
   document.getElementById("next").onclick = () => {
-    const missing = CRITERIA.filter(c => !draft.scores[c.id].daniela || !draft.scores[c.id].lila);
+    const missing = CRITERIA.filter(cardIncomplete);
     CRITERIA.forEach(c => document.getElementById("card-" + c.id).classList.toggle("missing", missing.includes(c)));
     if (missing.length){
-      document.getElementById("err").textContent = `Falta calificar a ambas candidatas en todos los criterios (${missing.length} incompletos).`;
+      const noScore = missing.filter(c => !draft.scores[c.id].daniela || !draft.scores[c.id].lila).length;
+      const noNote = missing.length - noScore;
+      document.getElementById("err").textContent = [
+        noScore ? `${noScore} criterio${noScore > 1 ? "s" : ""} sin puntaje para ambas candidatas (usa N/O si no tienes base)` : "",
+        noNote ? `${noNote} criterio${noNote > 1 ? "s" : ""} requiere${noNote > 1 ? "n" : ""} evidencia escrita` : "",
+      ].filter(Boolean).join(" · ") + ".";
       document.getElementById("card-" + missing[0].id).scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
@@ -530,7 +611,7 @@ async function submit(){
   btn.disabled = true; btn.textContent = "Enviando…"; err.textContent = "";
   const row = {
     evaluator_name: draft.name.trim(),
-    scores: draft.scores,
+    scores: Object.fromEntries(CRITERIA.map(c => { const x = draft.scores[c.id]; return [c.id, { daniela: x.daniela, lila: x.lila, note: x.note.trim() }]; })),
     comparisons: draft.comparisons,
     final_choice: draft.final_choice,
     final_reasoning: draft.final_reasoning.map(s => s.trim()).filter(Boolean),
@@ -596,15 +677,23 @@ function renderAdminLogin(msg){
 function aggregate(rows){
   const n = rows.length;
   const crit = CRITERIA.map(c => {
-    const avg = {};
+    const avg = {}, no = {};
     CANDIDATES.forEach(cd => {
-      const vals = rows.map(r => r.scores && r.scores[c.id] && r.scores[c.id][cd.key]).filter(v => typeof v === "number");
+      const raw = rows.map(r => r.scores && r.scores[c.id] && r.scores[c.id][cd.key]);
+      const vals = raw.filter(isNum);
       avg[cd.key] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+      no[cd.key] = raw.filter(v => v === NO).length;
     });
-    return { c, avg, diff: (avg.daniela || 0) - (avg.lila || 0) };
+    const diff = avg.daniela != null && avg.lila != null ? avg.daniela - avg.lila : null;
+    return { c, avg, no, diff };
   });
+  // Total del Comité = promedio de los ponderados individuales (cada uno ya ajustado por N/O).
   const total = {};
-  CANDIDATES.forEach(cd => total[cd.key] = n ? crit.reduce((s, x) => s + (x.avg[cd.key] || 0) * x.c.weight / 100, 0) : null);
+  CANDIDATES.forEach(cd => {
+    const ws = rows.map(r => weighted(r.scores, cd.key)).filter(v => v != null);
+    total[cd.key] = ws.length ? ws.reduce((a, b) => a + b, 0) / ws.length : null;
+  });
+  const noTotal = crit.reduce((t, x) => t + x.no.daniela + x.no.lila, 0);
   const q = QUESTIONS.map(qq => {
     const t = { Daniela: 0, Lila: 0 };
     rows.forEach(r => { const v = r.comparisons && r.comparisons[qq.id]; if (t[v] != null) t[v]++; });
@@ -612,10 +701,11 @@ function aggregate(rows){
   });
   const fin = { Daniela: 0, Lila: 0 };
   rows.forEach(r => { if (fin[r.final_choice] != null) fin[r.final_choice]++; });
-  return { n, crit, total, q, fin };
+  return { n, crit, total, q, fin, noTotal };
 }
 
 function advChip(diff){
+  if (diff == null) return `<span class="chip tie">Sin base</span>`;
   if (Math.abs(diff) < 0.05) return `<span class="chip tie">Empate</span>`;
   const c = diff > 0 ? CANDIDATES[0] : CANDIDATES[1];
   return `<span class="chip ${c.cls}">${c.name} +${fmt(Math.abs(diff))}</span>`;
@@ -632,18 +722,19 @@ function splitBar(d, l){
 
 function renderDashboard(){
   const A = aggregate(adminData);
-  const lead = A.n ? (Math.abs(A.total.daniela - A.total.lila) < 0.005 ? null : (A.total.daniela > A.total.lila ? "Daniela" : "Lila")) : null;
+  const lead = A.n && A.total.daniela != null && A.total.lila != null ? (Math.abs(A.total.daniela - A.total.lila) < 0.005 ? null : (A.total.daniela > A.total.lila ? "Daniela" : "Lila")) : null;
 
   const evCards = adminData.map(r => {
     const wd = weighted(r.scores, "daniela"), wl = weighted(r.scores, "lila");
-    const scoreLeader = Math.abs(wd - wl) < 0.005 ? null : (wd > wl ? "Daniela" : "Lila");
+    const nNO = CRITERIA.filter(c => { const s = (r.scores && r.scores[c.id]) || {}; return s.daniela === NO || s.lila === NO; }).length;
+    const scoreLeader = wd == null || wl == null || Math.abs(wd - wl) < 0.005 ? null : (wd > wl ? "Daniela" : "Lila");
     const mismatch = scoreLeader && r.final_choice && scoreLeader !== r.final_choice;
     const fc = candByName(r.final_choice);
     return `
     <details class="ev">
       <summary>
         <div><div class="nm">${esc(r.evaluator_name)}</div>
-          <div class="sm">Ponderado: <b style="color:var(--dan)">${fmt(wd)}</b> vs <b style="color:var(--lila)">${fmt(wl)}</b> · ${new Date(r.created_at).toLocaleString("es-MX")}</div></div>
+          <div class="sm">Ponderado: <b style="color:var(--dan)">${fmt(wd)}</b> vs <b style="color:var(--lila)">${fmt(wl)}</b>${nNO ? ` · N/O en ${nNO}` : ""} · ${new Date(r.created_at).toLocaleString("es-MX")}</div></div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
           ${fc ? `<span class="chip ${fc.cls}">${fc.name}</span>` : ""}
           ${mismatch ? `<span class="chip warn" title="Su preferencia final difiere de su puntaje ponderado más alto">≠ puntajes</span>` : ""}
@@ -653,9 +744,9 @@ function renderDashboard(){
         <table class="sc">
           <thead><tr><th>Criterio</th><th style="text-align:center">Dan.</th><th style="text-align:center">Lila</th></tr></thead>
           <tbody>
-          ${CRITERIA.map((c, i) => { const s = (r.scores && r.scores[c.id]) || {}; return `
-            <tr><td>${i + 1}. ${esc(c.title)} <span class="muted">(${c.weight}%)</span>${s.note ? `<span class="obs">“${esc(s.note)}”</span>` : ""}</td>
-            <td class="n dan">${esc(s.daniela ?? "–")}</td><td class="n lila">${esc(s.lila ?? "–")}</td></tr>`; }).join("")}
+          ${CRITERIA.map(c => { const s = (r.scores && r.scores[c.id]) || {}; return `
+            <tr><td>${c.num}. ${esc(c.title)} <span class="muted">(${c.weight}%)</span>${s.note ? `<span class="obs">“${esc(s.note)}”</span>` : ""}</td>
+            <td class="n dan">${esc(showVal(s.daniela))}</td><td class="n lila">${esc(showVal(s.lila))}</td></tr>`; }).join("")}
           </tbody>
         </table>
         <div class="section-title" style="margin-top:16px">Preguntas de contraste</div>
@@ -685,8 +776,10 @@ function renderDashboard(){
       </div>
       <div class="meta">
         <span>Evaluadores: <b>${A.n}</b></span>
+        <span>Respuestas N/O: <b>${A.noTotal}</b></span>
         <span>Ventaja en puntaje: <b>${lead ? `<span style="color:var(--${candByName(lead).cls})">${lead}</span> (+${fmt(Math.abs(A.total.daniela - A.total.lila))})` : (A.n ? "Empate" : "–")}</b></span>
       </div>
+      <p class="desc" style="margin:10px 0 0">Promedio de los ponderados individuales. Cada ponderado excluye los criterios marcados N/O y se reescala sobre el peso efectivamente evaluado.</p>
     </div>
 
     ${A.n ? `
@@ -698,13 +791,14 @@ function renderDashboard(){
 
     <div class="card">
       <h3>Desglose por criterio</h3>
-      <p class="desc" style="margin-bottom:4px">Promedio por candidata (1–5). ★ = criterio de mayor peso.</p>
-      ${A.crit.map((x, i) => `
+      <p class="desc" style="margin-bottom:4px">Promedio por candidata (1–5), sin contar N/O. ★ = criterio de mayor peso. 10a y 10b comparten el 2%.</p>
+      ${A.crit.map(x => `
         <div class="crow ${x.c.key ? "key" : ""}">
-          <div class="top"><span class="t">${i + 1}. ${esc(x.c.title)} <span class="muted">· ${x.c.weight}%</span></span>${advChip(x.diff)}</div>
+          <div class="top"><span class="t">${x.c.num}. ${esc(x.c.title)} <span class="muted">· ${x.c.weight}%</span></span>${advChip(x.diff)}</div>
           ${CANDIDATES.map(cd => `<div class="hbar"><span class="cand-name ${cd.cls}">${cd.name}</span>
             <div class="track"><div class="fill" style="width:${(x.avg[cd.key] || 0) / 5 * 100}%;background:var(--${cd.cls})"></div></div>
             <span class="v">${fmt(x.avg[cd.key])}</span></div>`).join("")}
+          ${x.no.daniela || x.no.lila ? `<div class="nocount">N/O: Daniela ${x.no.daniela} · Lila ${x.no.lila}</div>` : ""}
         </div>`).join("")}
     </div>
 
@@ -742,14 +836,14 @@ function renderDashboard(){
 
 function exportCSV(){
   const head = ["Evaluador", "Fecha de envío"];
-  CRITERIA.forEach((c, i) => head.push(`C${i + 1} Daniela`, `C${i + 1} Lila`, `C${i + 1} Evidencia`));
+  CRITERIA.forEach(c => head.push(`C${c.num} Daniela`, `C${c.num} Lila`, `C${c.num} Evidencia`));
   head.push("Ponderado Daniela", "Ponderado Lila");
   QUESTIONS.forEach((q, i) => head.push(`Q${i + 1}`));
   head.push("Preferencia final", "Razón 1", "Razón 2", "Razón 3");
   const rows = adminData.map(r => {
     const out = [r.evaluator_name, r.created_at];
-    CRITERIA.forEach(c => { const s = (r.scores && r.scores[c.id]) || {}; out.push(s.daniela ?? "", s.lila ?? "", s.note || ""); });
-    out.push(weighted(r.scores, "daniela").toFixed(2), weighted(r.scores, "lila").toFixed(2));
+    CRITERIA.forEach(c => { const s = (r.scores && r.scores[c.id]) || {}; out.push(s.daniela == null ? "" : showVal(s.daniela), s.lila == null ? "" : showVal(s.lila), s.note || ""); });
+    out.push(fmt(weighted(r.scores, "daniela")), fmt(weighted(r.scores, "lila")));
     QUESTIONS.forEach(q => out.push((r.comparisons && r.comparisons[q.id]) || ""));
     const fr = r.final_reasoning || [];
     out.push(r.final_choice || "", fr[0] || "", fr[1] || "", fr[2] || "");

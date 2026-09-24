@@ -87,11 +87,21 @@ Funciona sin login: un solo link para celular o computadora.
 
 Cambia descripciones y pesos **antes** de que el comité empiece a responder: el dashboard recalcula con los pesos actuales.
 
+## Reglas de llenado (ajustes del Comité)
+
+- **Guía breve** visible en cada criterio; la guía completa del Instrumento queda en "Ver guía completa".
+- **El evaluador no calcula nada**: la herramienta calcula el ponderado.
+- **N/O – no observado / información insuficiente**: disponible en cada criterio y para cada candidata. Se excluye del cálculo individual y el ponderado se reescala sobre el peso efectivamente evaluado (p. ej., si se marca N/O en el criterio 4, el resto se calcula sobre 82%).
+- **Evidencia escrita obligatoria solo** con puntaje extremo (1 o 5) o con 2+ puntos de diferencia entre candidatas. En los demás casos es opcional. Se configura en `EVIDENCE_RULE`.
+- **Identidad judía y alineación cultural** se mantiene en 18%.
+- **Finanzas (10a) y operación (10b)** se evalúan por separado y comparten el 2% original (1% cada uno).
+- **Total del Comité** = promedio de los ponderados individuales (cada uno ya ajustado por N/O).
+
 ## Qué muestra el dashboard
 
-- Puntaje ponderado total por candidata (sobre 5) y número de votos finales.
+- Puntaje ponderado total por candidata (sobre 5), número de votos finales y total de respuestas N/O.
 - Preferencia final: Daniela vs Lila.
-- Por criterio: promedio de cada candidata y quién tiene ventaja (★ = criterio de mayor peso).
+- Por criterio: promedio de cada candidata sin contar N/O, quién tiene ventaja y cuántos N/O hubo (★ = criterio de mayor peso).
 - Preguntas de comparación: conteo y % por pregunta.
 - Respuestas individuales desplegables (puntajes, notas, comparaciones y razonamiento final). La etiqueta **"≠ puntajes"** marca a quien eligió una candidata distinta a la que salió mejor en sus propios puntajes: conviene conversarlo en la sesión.
 - **Exportar CSV** para archivo o para abrir en Excel.

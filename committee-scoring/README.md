@@ -7,7 +7,9 @@ No requiere cuentas ni inicio de sesión: un solo enlace que funciona en celular
 - `index.html`: la aplicación completa (formulario y tablero de resultados).
 - `supabase-setup.sql`: crea la base de datos y las reglas de seguridad.
 
-**Contraseña de administración (pruebas):** `MaguenDavid-2026`
+**Contraseña de administración**
+- En **modo demo** (sin Supabase): `demo`.
+- En **vivo**: la eliges tú en el paso 1 y **solo existe en Supabase**. Este repositorio es **público**: nunca escribas la contraseña real en GitHub.
 
 > Supabase y Netlify tienen su interfaz en inglés. En esta guía, los nombres de sus botones y menús aparecen **tal como se ven en pantalla**, con su traducción entre paréntesis.
 
@@ -27,7 +29,7 @@ No requiere cuentas ni inicio de sesión: un solo enlace que funciona en celular
 1. Descarga `index.html` y ábrelo con doble clic en tu navegador.
 2. Verás un aviso naranja de **"Modo demo"**: las respuestas se guardan solo en ese navegador.
 3. Llena 2 o 3 valoraciones con nombres distintos. Para simular a otra persona, abre la página en una ventana de incógnito después de cada envío.
-4. Entra a "Administración" con `MaguenDavid-2026` para ver el tablero.
+4. Entra a "Administración" con `demo` para ver el tablero.
 
 ---
 
@@ -40,33 +42,42 @@ No requiere cuentas ni inicio de sesión: un solo enlace que funciona en celular
    - **Region** (región): la más cercana, p. ej. *East US*.
    - Da clic en **Create new project** (crear proyecto) y espera unos 2 minutos.
 3. Menú izquierdo → **SQL Editor** (editor SQL) → **New query** (nueva consulta).
-4. Abre `supabase-setup.sql`, copia **todo** el contenido, pégalo y da clic en **Run** (ejecutar). Debe aparecer *"Success. No rows returned"* (éxito, sin filas).
-5. Menú izquierdo → **Project Settings** (configuración del proyecto, ícono de engrane) → **API** o **API Keys** (llaves). Copia dos datos:
+4. Abre `supabase-setup.sql`, copia **todo** el contenido y pégalo en el editor de Supabase.
+5. **Ahí mismo, en Supabase**, busca la línea marcada `CONTRASEÑA DE ADMINISTRACIÓN (solo esta línea)` y reemplaza `CAMBIA-ESTA-CONTRASEÑA` por tu contraseña (conserva las comillas). Mientras no la cambies, nadie puede ver los resultados.
+6. Da clic en **Run** (ejecutar). Debe aparecer *"Success. No rows returned"* (éxito, sin filas).
+7. Menú izquierdo → **Project Settings** (configuración del proyecto, ícono de engrane) → **API** o **API Keys** (llaves). Copia dos datos:
    - **Project URL** (dirección del proyecto), algo como `https://abcd1234.supabase.co`
    - **anon public key** o **publishable key** (llave pública): una cadena larga que empieza con `eyJ...` o con `sb_publishable_...`
 
 > La llave pública está hecha para ir en la página. **Nunca** uses la llave **service_role** / **secret** (llave secreta).
 
-## Paso 2: conectar la página con Supabase (2 minutos)
+## Paso 2: conectar la página con Supabase (2 minutos, desde GitHub)
 
-1. Abre `index.html` con un editor de texto (Bloc de notas en Windows, TextEdit en modo "texto sin formato" en Mac).
+1. En GitHub, abre el archivo `committee-scoring/index.html` y da clic en el ícono del lápiz (**Edit this file**, editar).
 2. Busca el bloque que dice `CONFIGURACIÓN` cerca del inicio y reemplaza los dos valores:
 
    ```js
    SUPABASE_URL: "https://abcd1234.supabase.co",
    SUPABASE_ANON_KEY: "eyJhbGciOi...tu-llave-completa...",
    ```
-3. Guarda el archivo. Al abrir la página ya **no** debe aparecer el aviso naranja de "Modo demo".
+3. Da clic en **Commit changes** (guardar cambios). La dirección y la llave pública pueden estar en un repositorio público; la contraseña **no**.
+4. Al abrir la página ya **no** debe aparecer el aviso naranja de "Modo demo".
 
-## Paso 3: publicarla en internet (3 minutos, gratis)
+## Paso 3: publicarla con GitHub Pages (3 minutos, gratis)
 
-**Opción recomendada: Netlify Drop (no requiere conocimientos técnicos)**
-1. Crea una carpeta en tu computadora que contenga solo `index.html`.
-2. Entra a <https://app.netlify.com/drop> y arrastra la carpeta a la página.
-3. Netlify te da un enlace tipo `https://nombre-aleatorio.netlify.app`. Crea una cuenta gratuita para que el sitio no caduque y, si quieres, cambia el nombre en **Site configuration → Change site name** (configuración del sitio → cambiar nombre), p. ej. `chmd-comite.netlify.app`.
-4. Para actualizar la página después: **Deploys** (publicaciones) → arrastra de nuevo la carpeta.
+1. La aplicación debe estar en la rama principal (`main`) del repositorio.
+2. En GitHub, entra al repositorio → **Settings** (configuración) → menú izquierdo **Pages** (páginas).
+3. En **Build and deployment** (publicación), elige **Source: Deploy from a branch** (publicar desde una rama).
+4. En **Branch** (rama) elige `main` y la carpeta `/ (root)` (raíz) → **Save** (guardar).
+5. Espera 1 o 2 minutos y recarga la página de configuración. Arriba aparecerá **"Your site is live at…"** (tu sitio está publicado en…).
+6. El enlace para el Comité es:
 
-**Alternativa: GitHub Pages** (desde este repositorio): **Settings → Pages → Deploy from branch** (configuración → páginas → publicar desde rama). El enlace será `https://<usuario>.github.io/<repositorio>/committee-scoring/`.
+   **`https://75tk67fw72-web.github.io/Personal-1/committee-scoring/`**
+
+   El tablero de resultados está en la misma dirección terminada en `#resultados`.
+7. Cada cambio que se guarde en `main` se publica solo en 1 o 2 minutos.
+
+**Alternativa sin GitHub: Netlify Drop.** Entra a <https://app.netlify.com/drop> y arrastra una carpeta que contenga solo `index.html`. Sirve si prefieres que el código no quede en un repositorio público.
 
 ## Paso 4: prueba final antes de enviarlo al Comité
 
@@ -100,7 +111,7 @@ No requiere cuentas ni inicio de sesión: un solo enlace que funciona en celular
 
 | Qué quieres cambiar | Dónde |
 |---|---|
-| Contraseña de administración | `supabase-setup.sql`, línea marcada `CONTRASEÑA DE ADMINISTRACIÓN` → vuelve a ejecutar el archivo completo en el SQL Editor. (En modo demo: `DEMO_ADMIN_PASSWORD` en `index.html`.) |
+| Contraseña de administración | En Supabase → SQL Editor: pega `supabase-setup.sql`, pon la nueva contraseña en la línea marcada y ejecútalo. **Nunca en GitHub.** |
 | Guías y descripciones de criterios | `index.html` → lista `CRITERIA`, campos `guide` (breve) y `desc` (completa). |
 | Pesos | `index.html` → lista `CRITERIA`, campo `weight` (deben sumar 100). |
 | Preguntas de contraste | `index.html` → lista `QUESTIONS`. |
@@ -113,6 +124,6 @@ Haz los cambios de criterios y pesos **antes** de que el Comité empiece a respo
 ## Solución de problemas
 
 - **"No se pudo enviar… error del servidor, código 401 o 404"**: la dirección o la llave de Supabase están mal copiadas, o no se ejecutó el SQL.
-- **"Contraseña incorrecta"** con la contraseña correcta: vuelve a ejecutar la versión más reciente de `supabase-setup.sql` (paso 1.4).
+- **"Contraseña incorrecta"** con la contraseña correcta: revisa que cambiaste `CAMBIA-ESTA-CONTRASEÑA` antes de ejecutar el SQL (paso 1.5). Si no, repítelo con tu contraseña.
 - **Un evaluador dice que ya envió pero no aparece**: pídele que lo intente desde el mismo dispositivo; si ve "Ya existe una valoración con este nombre", su respuesta sí está guardada.
 - **Alguien necesita volver a responder**: elimina su respuesta desde el tablero y pídele que abra la página en otro navegador o en modo incógnito.

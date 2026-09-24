@@ -865,9 +865,21 @@ function route(){
   if (location.hash === "#resultados" || location.hash === "#admin"){ adminPassword ? renderDashboard() : renderAdminLogin(); }
   else renderEvaluator();
 }
-window.addEventListener("hashchange", route);
-if (DEMO) document.getElementById("demoBanner").hidden = false;
-route();
+window.addEventListener("hashchange", () => { if (!BLOCKED) route(); });
+// Publicada en internet sin Supabase conectado: no se permite responder, porque las
+// respuestas quedarían solo en el navegador de cada persona y se perderían.
+// (Para probar el modo demo: abrir el archivo en la computadora, o agregar ?demo=1.)
+const BLOCKED = DEMO && location.protocol !== "file:" && !/[?&]demo=1\b/.test(location.search);
+if (BLOCKED){
+  $app.innerHTML = `<div class="card center thanks" style="margin-top:24px">
+    <h2>La valoración aún no está disponible</h2>
+    <p class="lead">Estamos terminando de configurar la herramienta. Intenta de nuevo más tarde o contacta a quien coordina el Comité.</p>
+  </div>`;
+  document.getElementById("adminLink").hidden = true;
+} else {
+  if (DEMO) document.getElementById("demoBanner").hidden = false;
+  route();
+}
 </script>
 </body>
 </html>

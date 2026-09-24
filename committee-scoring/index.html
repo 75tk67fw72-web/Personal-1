@@ -485,13 +485,12 @@ const cardIncomplete = c => { const s = draft.scores[c.id]; return !s.daniela ||
 
 function renderPart1(){
   const cards = CRITERIA.map(c => `
-    <div class="card crit ${c.key ? "key" : ""}" id="card-${c.id}">
+    <div class="card crit" id="card-${c.id}">
       ${c.group ? `<div class="group">${esc(c.group)}</div>` : ""}
       <div class="head">
         <h3><span class="num">${c.num}.</span>${esc(c.title)}</h3>
         <span class="weight">${c.weight}%</span>
       </div>
-      ${c.key ? `<span class="flag">★ Criterio de mayor peso</span>` : ""}
       <p class="guide">${esc(c.guide)}</p>
       <details class="more"><summary>Ver guía completa</summary>${c.desc.map(d => `<p class="desc">${esc(d)}</p>`).join("")}</details>
       ${CANDIDATES.map(cd => scaleHTML(c.id, cd)).join("")}

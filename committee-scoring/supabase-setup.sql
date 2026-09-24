@@ -1,16 +1,16 @@
 -- =====================================================================
--- CHMD · Committee Scoring Tool — Supabase setup
--- Paste this whole file into Supabase > SQL Editor > New query > Run.
--- It is safe to run more than once.
+-- CHMD · Instrumento de Valoración Final — configuración de Supabase
+-- Pega este archivo completo en Supabase > SQL Editor > New query > Run.
+-- Se puede ejecutar más de una vez sin problema.
 --
--- Security model
---   * Evaluators (anonymous, no login) can only INSERT their evaluation.
---   * Nobody can read the table directly with the public key.
---   * Results are only returned by get_results(password), which checks the
---     admin password on the server. The password never ships in the web page.
+-- Modelo de seguridad
+--   * Los evaluadores (anónimos, sin login) solo pueden ENVIAR su valoración.
+--   * Nadie puede leer la tabla directamente con la llave pública.
+--   * Los resultados solo se entregan con get_results(contraseña), que valida
+--     la contraseña en el servidor. La contraseña nunca viaja en la página web.
 --
--- To change the admin password: edit the ONE line below marked
--- "ADMIN PASSWORD", then run this file again.
+-- Para cambiar la contraseña de administración: edita la ÚNICA línea marcada
+-- "CONTRASEÑA DE ADMINISTRACIÓN" y vuelve a ejecutar este archivo.
 -- =====================================================================
 
 create table if not exists public.evaluations (
@@ -25,7 +25,7 @@ create table if not exists public.evaluations (
   constraint evaluations_one_per_name unique (evaluator_key)
 );
 
--- Row Level Security: anonymous users may insert, never read/update/delete.
+-- Seguridad por fila: los anónimos pueden insertar; nunca leer, modificar ni borrar.
 alter table public.evaluations enable row level security;
 
 revoke all on public.evaluations from anon, authenticated;
@@ -33,20 +33,21 @@ grant insert (evaluator_name, scores, comparisons, final_choice, final_reasoning
   on public.evaluations to anon;
 
 drop policy if exists "anon can submit" on public.evaluations;
-create policy "anon can submit" on public.evaluations
+drop policy if exists "envio anonimo" on public.evaluations;
+create policy "envio anonimo" on public.evaluations
   for insert to anon with check (true);
 
--- Admin password lives here (server side only).
+-- La contraseña de administración vive aquí (solo en el servidor).
 create or replace function public.chmd_admin_ok(p_password text)
 returns boolean
 language sql
 immutable
 as $$
-  select p_password = 'MaguenDavid-2026';   -- <<< ADMIN PASSWORD
+  select p_password = 'MaguenDavid-2026';   -- <<< CONTRASEÑA DE ADMINISTRACIÓN
 $$;
 revoke all on function public.chmd_admin_ok(text) from public, anon, authenticated;
 
--- Returns every evaluation, only if the password is correct.
+-- Devuelve todas las valoraciones, solo si la contraseña es correcta.
 create or replace function public.get_results(p_password text)
 returns setof public.evaluations
 language plpgsql
@@ -55,7 +56,7 @@ set search_path = public
 as $$
 begin
   if not coalesce(public.chmd_admin_ok(p_password), false) then
-    raise exception 'invalid admin password' using errcode = '28P01';
+    raise exception 'contraseña inválida' using errcode = '28P01';
   end if;
   return query select * from public.evaluations order by created_at;
 end;
@@ -63,7 +64,7 @@ $$;
 revoke all on function public.get_results(text) from public;
 grant execute on function public.get_results(text) to anon;
 
--- Lets the admin delete one evaluation (e.g. test entries).
+-- Permite a la administración borrar una valoración (p. ej. pruebas).
 create or replace function public.delete_evaluation(p_password text, p_id uuid)
 returns void
 language plpgsql
@@ -72,7 +73,7 @@ set search_path = public
 as $$
 begin
   if not coalesce(public.chmd_admin_ok(p_password), false) then
-    raise exception 'invalid admin password' using errcode = '28P01';
+    raise exception 'contraseña inválida' using errcode = '28P01';
   end if;
   delete from public.evaluations where id = p_id;
 end;

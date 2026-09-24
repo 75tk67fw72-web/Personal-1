@@ -199,7 +199,7 @@
   </div>
 </header>
 <div id="demoBanner" class="demo-banner" hidden>
-  Modo demo — las respuestas se guardan solo en este navegador. Conecta Supabase para operar en vivo (ver README).
+  Modo demo — las respuestas se guardan solo en este navegador. Conecta Google Sheets para operar en vivo (ver README).
 </div>
 
 <main class="wrap" id="app" aria-live="polite"></main>
@@ -214,13 +214,12 @@
    CONFIGURACIÓN — lo único que necesitas editar
    ===================================================================== */
 const CONFIG = {
-  // Datos de Supabase > Project Settings > API. Si se dejan así, la app funciona en modo demo.
-  SUPABASE_URL: "YOUR_SUPABASE_URL",           // p. ej. https://abcd1234.supabase.co
-  SUPABASE_ANON_KEY: "YOUR_SUPABASE_ANON_KEY", // la llave pública ("anon" / "publishable")
+  // Dirección del servicio de Google Apps Script (termina en /exec). Ver README, paso 1.
+  // Si se deja así, la app funciona en modo demo.
+  APPS_SCRIPT_URL: "PEGA-AQUI-LA-DIRECCION-DE-APPS-SCRIPT",
 
-  // Se usa SOLO en modo demo. En vivo, la contraseña la valida Supabase
-  // (ver supabase-setup.sql) y nunca aparece en esta página.
-  // No pongas aquí la contraseña real: esta página es pública.
+  // Se usa SOLO en modo demo. En vivo, la contraseña la valida Google Apps Script
+  // y nunca aparece en esta página. No pongas aquí la contraseña real: esta página es pública.
   DEMO_ADMIN_PASSWORD: "demo",
 };
 
@@ -286,9 +285,9 @@ const QUESTIONS = [
 ];
 
 /* =====================================================================
-   Almacenamiento (Supabase en vivo, o memoria del navegador en modo demo)
+   Almacenamiento (Google Sheets vía Apps Script, o memoria del navegador en modo demo)
    ===================================================================== */
-const DEMO = !/^https:\/\//.test(CONFIG.SUPABASE_URL) || CONFIG.SUPABASE_ANON_KEY.startsWith("YOUR_");
+const DEMO = !/^https:\/\/script\.google\.com\/.+\/exec$/.test(CONFIG.APPS_SCRIPT_URL.trim());
 const LS_SUBMITTED = "chmd_eval_submitted_v1";
 const LS_DRAFT = "chmd_eval_draft_v2";
 const LS_DEMO_DB = "chmd_eval_demo_db_v1";
@@ -299,14 +298,17 @@ const ls = {
   del(k){ try { localStorage.removeItem(k); } catch {} },
 };
 
-function sbHeaders(extra){
-  return Object.assign({
-    "apikey": CONFIG.SUPABASE_ANON_KEY,
-    "Authorization": "Bearer " + CONFIG.SUPABASE_ANON_KEY,
-    "Content-Type": "application/json",
-  }, extra || {});
+// Content-Type text/plain evita la verificación previa (CORS) que Apps Script no acepta.
+async function callScript(body){
+  const res = await fetch(CONFIG.APPS_SCRIPT_URL.trim(), {
+    method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error("error del servidor, código " + res.status);
+  let out;
+  try { out = await res.json(); } catch { throw new Error("respuesta inesperada del servidor; revisa que el servicio esté publicado para «Cualquier persona»"); }
+  if (!out.ok) throw new Error(out.error === "INVALID" ? "datos incompletos o inválidos" : (out.error || "error del servidor"));
+  return out;
 }
-const sbBase = () => CONFIG.SUPABASE_URL.replace(/\/+$/, "");
 
 const api = {
   async submit(row){
@@ -318,36 +320,21 @@ const api = {
       ls.set(LS_DEMO_DB, db);
       return;
     }
-    const res = await fetch(sbBase() + "/rest/v1/evaluations", {
-      method: "POST", headers: sbHeaders({ "Prefer": "return=minimal" }), body: JSON.stringify(row),
-    });
-    if (res.status === 409) throw new Error("DUPLICATE");
-    if (!res.ok) throw new Error("error del servidor, código " + res.status);
+    await callScript({ action: "submit", row });
   },
   async results(password){
     if (DEMO){
       if (password !== CONFIG.DEMO_ADMIN_PASSWORD) throw new Error("BAD_PASSWORD");
       return ls.get(LS_DEMO_DB) || [];
     }
-    const res = await fetch(sbBase() + "/rest/v1/rpc/get_results", {
-      method: "POST", headers: sbHeaders(), body: JSON.stringify({ p_password: password }),
-    });
-    if (!res.ok){
-      const t = await res.text();
-      if (/contraseña inválida|invalid admin password/i.test(t)) throw new Error("BAD_PASSWORD");
-      throw new Error("No se pudieron cargar los resultados (error del servidor, código " + res.status + ").");
-    }
-    return res.json();
+    return (await callScript({ action: "results", password })).rows;
   },
   async remove(password, id){
     if (DEMO){
       ls.set(LS_DEMO_DB, (ls.get(LS_DEMO_DB) || []).filter(r => r.id !== id));
       return;
     }
-    const res = await fetch(sbBase() + "/rest/v1/rpc/delete_evaluation", {
-      method: "POST", headers: sbHeaders(), body: JSON.stringify({ p_password: password, p_id: id }),
-    });
-    if (!res.ok) throw new Error("No se pudo eliminar (" + res.status + ")");
+    await callScript({ action: "delete", password, id });
   },
 };
 
@@ -866,7 +853,7 @@ function route(){
   else renderEvaluator();
 }
 window.addEventListener("hashchange", () => { if (!BLOCKED) route(); });
-// Publicada en internet sin Supabase conectado: no se permite responder, porque las
+// Publicada en internet sin Google Sheets conectado: no se permite responder, porque las
 // respuestas quedarían solo en el navegador de cada persona y se perderían.
 // (Para probar el modo demo: abrir el archivo en la computadora, o agregar ?demo=1.)
 const BLOCKED = DEMO && location.protocol !== "file:" && !/[?&]demo=1\b/.test(location.search);

@@ -28,17 +28,19 @@ Un solo enlace, en celular o computadora, sin cuentas ni inicio de sesión.
 
 ---
 
-## Paso 1: crear la hoja y el servicio de Google (7 minutos)
+## Paso 1: crear el servicio de Google (7 minutos)
 
-1. Entra a <https://sheets.new> con tu cuenta de Google. Ponle de nombre **CHMD · Valoraciones del Comité**.
-2. Menú **Extensiones → Apps Script**.
+1. En la computadora, entra a <https://script.google.com> con tu cuenta de Google y da clic en **Nuevo proyecto**.
+2. Arriba a la izquierda, cambia "Proyecto sin título" por **CHMD Valoraciones**.
 3. Borra el código que aparece, pega **todo** el contenido de `apps-script/Code.gs` y, **ahí mismo**, cambia `CAMBIA-ESTA-CONTRASEÑA` por tu contraseña (conserva las comillas).
 4. Guarda (ícono de disco).
-5. **Implementar → Nueva implementación**. En el engrane de "Seleccionar tipo" elige **Aplicación web** y configura:
+5. En la barra de arriba elige la función **crearHoja** y da clic en **▶ Ejecutar**. Google pedirá permiso: **Revisar permisos → tu cuenta → Configuración avanzada → Ir a CHMD Valoraciones (no seguro) → Permitir**. Esto crea en tu Google Drive la hoja **"CHMD · Valoraciones del Comité"**, donde llegarán las respuestas.
+6. **Implementar → Nueva implementación**. En el engrane de "Seleccionar tipo" elige **Aplicación web** y configura:
    - **Ejecutar como:** Yo
    - **Quién tiene acceso:** Cualquier persona
-6. Da clic en **Implementar** y **autoriza el acceso**. Google avisa que la app no está verificada porque la creaste tú: **Configuración avanzada → Ir a (nombre del proyecto) → Permitir**.
-7. Copia la **URL de la aplicación web** (termina en `/exec`).
+7. Da clic en **Implementar** y copia la **URL de la aplicación web** (termina en `/exec`).
+
+> ¿Prefieres partir de una hoja existente? Desde Google Sheets: **Extensiones → Apps Script** y sigue desde el punto 3 (el punto 5 no hace falta). Si no ves "Apps Script" en Extensiones, es porque el archivo es de Excel o tu cuenta lo tiene limitado: usa la ruta de arriba.
 
 > Si después cambias el código o la contraseña: **Implementar → Administrar implementaciones → lápiz → Versión: Nueva versión → Implementar**. La URL no cambia.
 

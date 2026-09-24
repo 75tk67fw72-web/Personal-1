@@ -15,8 +15,30 @@ const SHEET_NAME = "Valoraciones";
 const HEADERS = ["id", "fecha", "evaluador", "preferencia_final", "razon_principal", "datos_json"];
 const CANDIDATAS = ["Daniela", "Lila"];
 
+// Funciona de dos formas:
+//  a) Proyecto creado desde la hoja (Extensiones → Apps Script): usa esa hoja.
+//  b) Proyecto creado en script.google.com: crea sola la hoja
+//     "CHMD · Valoraciones del Comité" en tu Google Drive la primera vez.
+function libro_() {
+  const activa = SpreadsheetApp.getActiveSpreadsheet();
+  if (activa) return activa;
+  const props = PropertiesService.getScriptProperties();
+  const id = props.getProperty("SHEET_ID");
+  if (id) return SpreadsheetApp.openById(id);
+  const nuevo = SpreadsheetApp.create("CHMD · Valoraciones del Comité");
+  props.setProperty("SHEET_ID", nuevo.getId());
+  return nuevo;
+}
+
+// Ejecútala una vez desde el editor (botón ▶ Ejecutar) para crear la hoja
+// y ver su enlace en el "Registro de ejecución".
+function crearHoja() {
+  hoja_();
+  Logger.log("Hoja lista: " + libro_().getUrl());
+}
+
 function hoja_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = libro_();
   let sh = ss.getSheetByName(SHEET_NAME);
   if (!sh) sh = ss.insertSheet(SHEET_NAME);
   if (sh.getLastRow() === 0){
